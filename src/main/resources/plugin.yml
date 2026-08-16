@@ -1,0 +1,23 @@
+name: PaperJackpot
+version: '${project.version}'
+main: com.project.paperjackpot.PaperJackpot
+api-version: '1.21'
+description: Plugin Casino Nổ Hũ Jackpot Cá Nhân & Quỹ Hũ Tích Lũy Server cho Paper 1.21.1
+author: HuyPhan
+softdepend:
+  - Vault
+  - PlaceholderAPI
+commands:
+  jackpot:
+    description: Mở Giao Diện Casino Nổ Hũ Jackpot
+    usage: /jackpot [top|reload|test|setpool|history]
+    aliases:
+      - jp
+      - quayhu
+permissions:
+  paperjackpot.use:
+    description: Cho phép mở Casino Nổ Hũ Jackpot
+    default: true
+  paperjackpot.admin:
+    description: Quyền Admin (reload, testjackpot, setpool, history)
+    default: op

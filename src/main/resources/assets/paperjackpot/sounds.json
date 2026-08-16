@@ -1,0 +1,8 @@
+{
+  "dealer_welcome": {
+    "category": "voice",
+    "sounds": [
+      "paperjackpot:dealer_welcome"
+    ]
+  }
+}

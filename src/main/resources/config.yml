@@ -1,0 +1,92 @@
+# ============================================
+# PaperJackpot - Cấu hình Plugin Quay Hũ Nổ Hũ
+# ============================================
+
+settings:
+  # Mức cược tối thiểu và tối đa ($)
+  min-bet-amount: 1000.0
+  max-bet-amount: 500000.0
+
+  # Thuế suất trên tiền thưởng (0.10 = 10% thuế)
+  tax-rate: 0.10
+
+  # Hệ số thưởng: Tất cả khoáng sản thắng thường là x2.0, Nổ Hũ Jackpot là x5.0 + Quỹ Hũ
+  normal-win-multiplier: 2.0
+  jackpot-multiplier: 5.0
+
+  # Tiêu đề giao diện GUI Quay Hũ (Ngắn gọn để không bị đè nút JEI)
+  gui-title: "<gradient:gold:yellow><bold>🎰 CASINO NỔ HŨ</bold></gradient>"
+
+  # Hiển thị BossBar Quỹ Hũ Tích Lũy toàn server cho mọi người chơi online
+  global-bossbar: true
+
+  # Thưởng Đua Top Thần Tài hằng tuần (Tự động trao thưởng vào 23:59 Chủ Nhật)
+  weekly-rewards:
+    enabled: true
+    top1-reward: 500000.0
+    top2-reward: 250000.0
+    top3-reward: 100000.0
+
+  # Sự Kiện Giờ Vàng Casino (Tự động nhân đôi tỷ lệ Nổ Hũ vào khung giờ 20:00 - 21:00)
+  happy-hour:
+    enabled: true
+    start-hour: 20
+    end-hour: 21
+
+  # Thưởng Chuỗi Quay May Mắn (Quay đủ 10 ván được 1 lượt x2 tỷ lệ trúng)
+  streak-bonus:
+    enabled: true
+    required-spins: 10
+
+# ============================================
+# Biểu tượng Slot Machine
+# ============================================
+symbols:
+  NETHERITE_BLOCK:
+    multiplier: 5.0
+    name: "Khối Netherite (NTR)"
+  DIAMOND:
+    multiplier: 2.0
+    name: "Kim Cương"
+  EMERALD:
+    multiplier: 2.0
+    name: "Lục Bảo"
+  GOLD_INGOT:
+    multiplier: 2.0
+    name: "Thỏi Vàng"
+  IRON_INGOT:
+    multiplier: 2.0
+    name: "Thỏi Sắt"
+  COPPER_INGOT:
+    multiplier: 2.0
+    name: "Thỏi Đồng"
+  AMETHYST_SHARD:
+    multiplier: 2.0
+    name: "Mảnh Thạch Anh"
+  LAPIS_LAZULI:
+    multiplier: 2.0
+    name: "Đá Lam Ngọc"
+  REDSTONE:
+    multiplier: 2.0
+    name: "Đá Đỏ"
+  QUARTZ:
+    multiplier: 2.0
+    name: "Thạch Anh Trắng"
+  COAL:
+    multiplier: 2.0
+    name: "Than Đá"
+  ECHO_SHARD:
+    multiplier: 2.0
+    name: "Mảnh Định Âm"
+
+# ============================================
+# Thông báo hiển thị cho người chơi trong CHAT (MiniMessage format)
+# ============================================
+messages:
+  no-permission: "<red>❌ Bạn không có quyền sử dụng lệnh này!</red>"
+  reload-success: "<green>✅ Đã reload cấu hình PaperJackpot thành công!</green>"
+  not-enough-money: "<red>❌ Bạn không đủ tiền! Cần tối thiểu {amount}$ để quay lượt này.</red>"
+  welcome-dealer: "<gradient:gold:yellow><bold>🤖 [CASINO DEALER]</bold></gradient> <yellow>Kính chúc <gold><bold>Ông Chủ / Bà Chủ {player}</bold></gold> quay hũ phát tài, may mắn phát lộc và trúng đại lễ Jackpot! 🎉</yellow>"
+  win: "<green>🎉 TRÚNG! 3x {item} (x2.0) | Cược: {bet}$ → Thưởng: {gross}$ - Thuế (10%): {tax}$ = Nhận thực tế: {net}$</green>"
+  lose: "<red>❌ Không trúng! Mất {amount}$ cược. (Tiền thua đã nạp 100% vào Quỹ Hũ Server)</red>"
+  jackpot-win: "<gradient:#FF0000:#FFD700><bold>🔥 JACKPOT NỔ HŨ X5 + QUỸ HŨ! Cược: {bet}$ → Nhận: {gross}$ - Thuế (10%): {tax}$ = Nhận thực tế: {net}$ 🔥</bold></gradient>"
