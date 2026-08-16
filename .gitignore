@@ -11,6 +11,12 @@ target/
 *.sqlite3
 jackpot_history.db
 
+# Resource Assets & Sound Files
+src/main/resources/assets/
+*.ogg
+*.mp3
+*.wav
+
 # IDE & Editor files
 .idea/
 .vscode/
@@ -33,5 +39,3 @@ tmp/
 # Working scratch files
 find_files.py
 text.txt
-*.mp3
-/*.ogg
