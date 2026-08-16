@@ -106,6 +106,6 @@ Người chơi Minecraft PE (Pocket Edition) di động truy cập qua Geyser/Fl
 
 ## 🛡️ Tác Giả & Hỗ Trợ
 
-- **Đội Ngũ Phát Triển**: PaperJackpot Team
+- **Tác Giả / Phát Triển**: Huy Phan
 - **Phiên Bản**: `1.0.0`
 - **Giấy Phép**: MIT License
