@@ -81,6 +81,7 @@ symbols:
 
 # ============================================
 # Thông báo hiển thị cho người chơi trong CHAT (MiniMessage format)
+# Các biến hỗ trợ: {start}, {end}, {pool}, {player}, {amount}, {bet}, {gross}, {tax}, {net}
 # ============================================
 messages:
   no-permission: "<red>❌ Bạn không có quyền sử dụng lệnh này!</red>"
@@ -90,3 +91,19 @@ messages:
   win: "<green>🎉 TRÚNG! 3x {item} (x2.0) | Cược: {bet}$ → Thưởng: {gross}$ - Thuế (10%): {tax}$ = Nhận thực tế: {net}$</green>"
   lose: "<red>❌ Không trúng! Mất {amount}$ cược. (Tiền thua đã nạp 100% vào Quỹ Hũ Server)</red>"
   jackpot-win: "<gradient:#FF0000:#FFD700><bold>🔥 JACKPOT NỔ HŨ X5 + QUỸ HŨ! Cược: {bet}$ → Nhận: {gross}$ - Thuế (10%): {tax}$ = Nhận thực tế: {net}$ 🔥</bold></gradient>"
+
+  # Thông báo Sự Kiện Giờ Vàng Casino qua Chat
+  happy-hour-start: |
+    
+    <gradient:#FFD700:#FF4500><bold>🎆 [CASINO] SỰ KIỆN GIỜ VÀNG ĐÃ BẮT ĐẦU! 🎆</bold></gradient>
+    <yellow>⏰ Khung giờ vàng từ <gold><bold>{start}:00</bold></gold> đến <gold><bold>{end}:00</bold></gold> hằng ngày!</yellow>
+    <yellow>🔥 Quỹ Hũ hiện tại: <gold><bold>{pool}$</bold></gold> | Nhận ngay <gradient:#FF0000:#FFD700><bold>X2 TỶ LỆ NỔ HŨ JACKPOT</bold></gradient>!</yellow>
+    <yellow>👉 Nhanh tay gõ <gold><bold>/jackpot</bold></gold> để hốt trọn Quỹ Hũ ngay kẻo lỡ!</yellow>
+    
+
+  happy-hour-end: |
+    
+    <gradient:#FF4500:#FFD700><bold>⏰ [CASINO] SỰ KIỆN GIỜ VÀNG ĐÃ KẾT THÚC! ⏰</bold></gradient>
+    <yellow>Khung giờ vàng Nổ Hũ hôm nay đã chính thức khép lại. Cảm ơn các Đại Gia đã tham gia!</yellow>
+    <yellow>🎉 Hẹn gặp lại các chủ hũ vào <gold><bold>{start}:00 ngày mai</bold></gold> nhé!</yellow>
+    

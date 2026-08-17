@@ -17,7 +17,7 @@
 - **🎆 Pháo Hoa & Particle Vàng Kim Khi Nổ Hũ**: Khi trúng 3x Khối Netherite (Jackpot), người chơi nhận x5.0 tiền cược + hốt trọn 100% Quỹ Hũ Server kèm hiệu ứng bắn pháo hoa & particle rực rỡ.
 - **⚡ Chế Độ Auto Spin (Tự Động Quay Rảnh Tay)**: Nút gạt ở Slot 43 cho phép tự động đặt cược và quay liên tục mỗi 1.5 giây mà không cần bấm tay.
 - **🎡 Thưởng Chuỗi Quay May Mắn (Spin Streak)**: Quay đủ 10 ván liên tiếp, ván thứ 11 tự động nhận **Lucky Spin (x2 Tỷ Lệ Trúng Thưởng)**.
-- **🎆 Sự Kiện Giờ Vàng Casino (Happy Hour 20:00 - 21:00)**: Tự động nhân đôi tỷ lệ Nổ Hũ Jackpot trong khung giờ vàng hằng ngày.
+- **🎆 Sự Kiện Giờ Vàng Casino (Happy Hour 20:00 - 21:00)**: Tự động nhân đôi tỷ lệ Nổ Hũ Jackpot trong khung giờ vàng hằng ngày và **tự động bắn thông báo Chat rực rỡ + âm thanh mừng** tới toàn máy chủ khi bắt đầu/kết thúc sự kiện (Có thể tùy chỉnh lời nhắn trong `config.yml`).
 - **🎁 Lượt Quay Miễn Phí Hằng Ngày (24H Cooldown)**: Nút chest ở Slot 52 trao tặng 1 lượt quay miễn phí cược 1,000$ mỗi 24 giờ.
 - **🏆 Bảng Xếp Hạng Top 10 & Thống Kê Cá Nhân**: Đầy đủ GUI xem Top 10 Đại Gia Thắng Thưởng và GUI xem Thống Kê (Tổng ván quay, Winrate %, Lợi Nhuận Ròng, Chỉ số ROI %).
 - **📜 Giao Diện Lịch Sử Cược (`PersonalHistoryGui`)**: Xem lại 10 ván cược gần nhất trực tiếp trong giao diện game.

@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * ConfigManager - Quản lý config.yml (Happy Hour, Streak Bonus, BossBar Server, Weekly Rewards).
+ * ConfigManager - Quản lý config.yml (Happy Hour Messages, Streak Bonus, BossBar Server, Weekly Rewards).
  */
 public class ConfigManager {
 
@@ -50,6 +50,8 @@ public class ConfigManager {
     private String winMsg;
     private String loseMsg;
     private String jackpotWinMsg;
+    private String happyHourStartMsg;
+    private String happyHourEndMsg;
 
     private static final DecimalFormat MONEY_FORMAT = new DecimalFormat("#,###");
 
@@ -106,6 +108,9 @@ public class ConfigManager {
         winMsg = config.getString("messages.win", "<green>🎉 TRÚNG! 3x {item} (x2.0) | Cược: {bet}$ → Thưởng: {gross}$ - Thuế (10%): {tax}$ = Nhận thực tế: {net}$</green>");
         loseMsg = config.getString("messages.lose", "<red>❌ Không trúng! Mất {amount}$ cược. (Tiền thua đã nạp 100% vào Quỹ Hũ Server)</red>");
         jackpotWinMsg = config.getString("messages.jackpot-win", "<gradient:#FF0000:#FFD700><bold>🔥 JACKPOT NỔ HŨ X5 + QUỸ HŨ! Cược: {bet}$ → Nhận: {gross}$ - Thuế (10%): {tax}$ = Nhận thực tế: {net}$ 🔥</bold></gradient>");
+
+        happyHourStartMsg = config.getString("messages.happy-hour-start", "\n<gradient:#FFD700:#FF4500><bold>🎆 [CASINO] SỰ KIỆN GIỜ VÀNG ĐÃ BẮT ĐẦU! 🎆</bold></gradient>\n<yellow>⏰ Khung giờ vàng từ <gold><bold>{start}:00</bold></gold> đến <gold><bold>{end}:00</bold></gold> hằng ngày!</yellow>\n<yellow>🔥 Quỹ Hũ hiện tại: <gold><bold>{pool}$</bold></gold> | Nhận ngay <gradient:#FF0000:#FFD700><bold>X2 TỶ LỆ NỔ HŨ JACKPOT</bold></gradient>!</yellow>\n<yellow>👉 Nhanh tay gõ <gold><bold>/jackpot</bold></gold> để hốt trọn Quỹ Hũ ngay kẻo lỡ!</yellow>\n");
+        happyHourEndMsg = config.getString("messages.happy-hour-end", "\n<gradient:#FF4500:#FFD700><bold>⏰ [CASINO] SỰ KIỆN GIỜ VÀNG ĐÃ KẾT THÚC! ⏰</bold></gradient>\n<yellow>Khung giờ vàng Nổ Hũ hôm nay đã chính thức khép lại. Cảm ơn các Đại Gia đã tham gia!</yellow>\n<yellow>🎉 Hẹn gặp lại các chủ hũ vào <gold><bold>{start}:00 ngày mai</bold></gold> nhé!</yellow>\n");
 
         plugin.getLogger().info("[Config] Đã load cấu hình PaperJackpot thành công!");
     }
@@ -177,6 +182,20 @@ public class ConfigManager {
                 .replace("{gross}", formatMoney(gross))
                 .replace("{tax}", formatMoney(tax))
                 .replace("{net}", formatMoney(net)));
+    }
+
+    public Component getHappyHourStartMsg() {
+        double pool = plugin.getJackpotManager() != null ? plugin.getJackpotManager().getJackpotPool() : 0.0;
+        return mm.deserialize(happyHourStartMsg
+                .replace("{start}", String.valueOf(happyHourStart))
+                .replace("{end}", String.valueOf(happyHourEnd))
+                .replace("{pool}", formatMoney(pool)));
+    }
+
+    public Component getHappyHourEndMsg() {
+        return mm.deserialize(happyHourEndMsg
+                .replace("{start}", String.valueOf(happyHourStart))
+                .replace("{end}", String.valueOf(happyHourEnd)));
     }
 
     public static String formatMoney(double amount) {

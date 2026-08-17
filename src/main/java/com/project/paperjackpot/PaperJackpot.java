@@ -5,6 +5,7 @@ import com.project.paperjackpot.database.DatabaseManager;
 import com.project.paperjackpot.game.GameMode;
 import com.project.paperjackpot.listener.MenuListener;
 import com.project.paperjackpot.manager.ConfigManager;
+import com.project.paperjackpot.manager.HappyHourManager;
 import com.project.paperjackpot.manager.JackpotManager;
 import com.project.paperjackpot.manager.SeasonManager;
 import com.project.paperjackpot.placeholder.PaperJackpotExpansion;
@@ -28,6 +29,7 @@ public class PaperJackpot extends JavaPlugin {
     private DatabaseManager databaseManager;
     private JackpotManager jackpotManager;
     private SeasonManager seasonManager;
+    private HappyHourManager happyHourManager;
     private JackpotCommand jackpotCommand;
 
     // Quản lý phiên chơi cá nhân của người chơi online
@@ -40,6 +42,7 @@ public class PaperJackpot extends JavaPlugin {
         databaseManager = new DatabaseManager(this);
         jackpotManager = new JackpotManager(this);
         seasonManager = new SeasonManager(this);
+        happyHourManager = new HappyHourManager(this);
 
         // Hook Vault Economy (Không disable plugin nếu Vault load chậm)
         setupEconomy();
@@ -81,6 +84,9 @@ public class PaperJackpot extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (happyHourManager != null) {
+            happyHourManager.stop();
+        }
         if (databaseManager != null) {
             databaseManager.close();
         }
@@ -130,5 +136,6 @@ public class PaperJackpot extends JavaPlugin {
     public DatabaseManager getDatabaseManager() { return databaseManager; }
     public JackpotManager getJackpotManager() { return jackpotManager; }
     public SeasonManager getSeasonManager() { return seasonManager; }
+    public HappyHourManager getHappyHourManager() { return happyHourManager; }
     public JackpotCommand getJackpotCommand() { return jackpotCommand; }
 }
