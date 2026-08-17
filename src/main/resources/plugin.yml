@@ -10,7 +10,7 @@ softdepend:
 commands:
   jackpot:
     description: Mở Giao Diện Casino Nổ Hũ Jackpot
-    usage: /jackpot [top|reload|test|setpool|history]
+    usage: /jackpot [top|stats|time|testhappyhour|reload|test|setpool|history]
     aliases:
       - jp
       - quayhu

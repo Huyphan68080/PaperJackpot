@@ -15,6 +15,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -22,6 +24,8 @@ import java.util.List;
  * Hỗ trợ các sub-command:
  *   - /jackpot top (Xem Bảng Xếp Hạng Top 10 Thần Tài Casino)
  *   - /jackpot stats (Xem Thống Kê May Mắn Cá Nhân)
+ *   - /jackpot time (Kiểm tra múi giờ Việt Nam & thời gian Giờ Vàng)
+ *   - /jackpot testhappyhour (Phát thử thông báo & âm thanh Giờ Vàng)
  *   - /jackpot test (Kích hoạt 100% Nổ Hũ Jackpot lượt cược kế tiếp)
  *   - /jackpot setpool <số tiền> (Cài đặt Quỹ Hũ Server)
  *   - /jackpot reload (Reload cấu hình)
@@ -34,6 +38,8 @@ public class JackpotCommand implements CommandExecutor {
     private final JackpotManager jackpotManager;
     private final DatabaseManager databaseManager;
     private final MiniMessage mm = MiniMessage.miniMessage();
+
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yyyy");
 
     public JackpotCommand(PaperJackpot plugin) {
         this.plugin = plugin;
@@ -69,7 +75,26 @@ public class JackpotCommand implements CommandExecutor {
                 return true;
             }
 
-            // 3. LỆNH TEST NỔ HŨ: /jackpot test HOẶC /jackpot testjackpot HOẶC /jackpot testwin
+            // 3. LỆNH KIỂM TRA MÚI GIỜ VIỆT NAM & THỜI GIAN GIỜ VÀNG: /jackpot time HOẶC /jackpot testtime
+            if (subCmd.equals("time") || subCmd.equals("testtime") || subCmd.equals("clock")) {
+                sendTimeInfo(sender);
+                return true;
+            }
+
+            // 4. LỆNH BẮN THỬ THÔNG BÁO GIỜ VÀNG: /jackpot testhappyhour HOẶC /jackpot testhh
+            if (subCmd.equals("testhappyhour") || subCmd.equals("testhh") || subCmd.equals("triggerhappyhour")) {
+                if (!hasAdminPermission(sender)) {
+                    sender.sendMessage(configManager.getNoPermissionMsg());
+                    return true;
+                }
+                if (plugin.getHappyHourManager() != null) {
+                    plugin.getHappyHourManager().broadcastStartMessage();
+                    sender.sendMessage(mm.deserialize("<green>✅ Đã phát thử tin nhắn & âm thanh thông báo BẮT ĐẦU Giờ Vàng Casino thành công!</green>"));
+                }
+                return true;
+            }
+
+            // 5. LỆNH TEST NỔ HŨ: /jackpot test HOẶC /jackpot testjackpot HOẶC /jackpot testwin
             if (subCmd.equals("testjackpot") || subCmd.equals("test") || subCmd.equals("testwin")) {
                 if (!hasAdminPermission(sender)) {
                     sender.sendMessage(configManager.getNoPermissionMsg());
@@ -79,7 +104,7 @@ public class JackpotCommand implements CommandExecutor {
                 return true;
             }
 
-            // 4. RELOAD CONFIG: /jackpot reload HOẶC /jackpot rl
+            // 6. RELOAD CONFIG: /jackpot reload HOẶC /jackpot rl
             if (subCmd.equals("reload") || subCmd.equals("rl")) {
                 if (!hasAdminPermission(sender)) {
                     sender.sendMessage(configManager.getNoPermissionMsg());
@@ -90,7 +115,7 @@ public class JackpotCommand implements CommandExecutor {
                 return true;
             }
 
-            // 5. XEM LỊCH SỬ CSDL: /jackpot history HOẶC /jackpot log
+            // 7. XEM LỊCH SỬ CSDL: /jackpot history HOẶC /jackpot log
             if (subCmd.equals("history") || subCmd.equals("log")) {
                 if (!hasAdminPermission(sender)) {
                     sender.sendMessage(configManager.getNoPermissionMsg());
@@ -100,7 +125,7 @@ public class JackpotCommand implements CommandExecutor {
                 return true;
             }
 
-            // 6. LỆNH SET QUỸ HŨ TÍCH LŨY: /jackpot setpool <số tiền>
+            // 8. LỆNH SET QUỸ HŨ TÍCH LŨY: /jackpot setpool <số tiền>
             if (subCmd.equals("setpool") || subCmd.equals("sethuff")) {
                 if (!hasAdminPermission(sender)) {
                     sender.sendMessage(configManager.getNoPermissionMsg());
@@ -135,6 +160,23 @@ public class JackpotCommand implements CommandExecutor {
         SoloSlotSession session = plugin.getOrCreateSession(player, GameMode.MINERAL_SLOT);
         session.open(true);
         return true;
+    }
+
+    private void sendTimeInfo(CommandSender sender) {
+        ZonedDateTime vnNow = configManager.getNowInTimezone();
+        boolean isActive = configManager.isHappyHourActive();
+        int startHour = configManager.getHappyHourStart();
+        int endHour = configManager.getHappyHourEnd();
+
+        String statusStr = isActive
+                ? "<gradient:#FF0000:#FFD700><bold>🔥 ĐANG DIỄN RA (TỶ LỆ NỔ HŨ X2)</bold></gradient>"
+                : "<red><bold>❌ CHƯA ĐẾN GIỜ (Khung " + startHour + ":00 - " + endHour + ":00)</bold></red>";
+
+        sender.sendMessage(mm.deserialize("\n<gradient:gold:yellow><bold>⏰ [KIỂM TRA MÚI GIỜ SERVER & GIỜ VÀNG] ⏰</bold></gradient>"));
+        sender.sendMessage(mm.deserialize(" <gray>• Múi Giờ Cấu Hình: <gold><bold>" + configManager.getTimezone().getId() + " (UTC+7 - Việt Nam)</bold></gold></gray>"));
+        sender.sendMessage(mm.deserialize(" <gray>• Giờ Việt Nam Hiện Tại: <gold><bold>" + vnNow.format(TIME_FORMATTER) + "</bold></gold></gray>"));
+        sender.sendMessage(mm.deserialize(" <gray>• Khung Giờ Vàng Casino: <yellow><bold>" + startHour + ":00 - " + endHour + ":00 hằng ngày</bold></yellow></gray>"));
+        sender.sendMessage(mm.deserialize(" <gray>• Trạng Thái Sự Kiện: " + statusStr + "</gray>\n"));
     }
 
     private void handleTestJackpot(CommandSender sender) {
@@ -177,7 +219,9 @@ public class JackpotCommand implements CommandExecutor {
         sender.sendMessage(mm.deserialize(" <yellow>/jackpot</yellow> <gray>(hoặc <yellow>/jp</yellow>) - Vào phòng Quay Hũ Jackpot Cá Nhân</gray>"));
         sender.sendMessage(mm.deserialize(" <gold>/jackpot top</gold> - Xem Bảng Xếp Hạng Top 10 Thần Tài Casino"));
         sender.sendMessage(mm.deserialize(" <gold>/jackpot stats</gold> - Xem Bảng Thống Kê May Mắn Cá Nhân"));
+        sender.sendMessage(mm.deserialize(" <gold>/jackpot time</gold> - Kiểm tra múi giờ Việt Nam UTC+7 & Giờ Vàng"));
         if (hasAdminPermission(sender)) {
+            sender.sendMessage(mm.deserialize(" <gold>/jackpot testhappyhour</gold> - Bắn thử thông báo & âm thanh Giờ Vàng"));
             sender.sendMessage(mm.deserialize(" <gold>/jackpot test</gold> - Kích hoạt 100% Nổ Hũ Hốt Sạch Hũ lượt quay tới"));
             sender.sendMessage(mm.deserialize(" <gold>/jackpot setpool <tiền></gold> - Thao tác thiết lập Quỹ Hũ Tích Lũy"));
             sender.sendMessage(mm.deserialize(" <gold>/jackpot reload</gold> - Reload cấu hình"));

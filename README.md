@@ -37,15 +37,17 @@ Lệnh chính: `/jackpot` (Lệnh phụ: `/jp`, `/quayhu`, `/no-hu`, `/casino`)
 | `/jackpot` | Mở giao diện Casino Quay Hũ cá nhân | `paperjackpot.use` | `true` (Mọi người) |
 | `/jackpot top` | Mở Bảng Xếp Hạng Top 10 Thắng Thưởng | `paperjackpot.use` | `true` |
 | `/jackpot stats` | Mở giao diện Thống Kê Cá Nhân (ROI %, Lợi nhuận) | `paperjackpot.use` | `true` |
+| `/jackpot time` | Xem giờ Việt Nam UTC+7 hiện tại & trạng thái Giờ Vàng | `paperjackpot.use` | `true` |
 | `/jackpot help` | Xem danh sách hướng dẫn lệnh | `paperjackpot.use` | `true` |
 
 ### 🛠️ Lệnh Quản Trị Viên (Admin Commands)
 
 | Lệnh | Mô Tả | Quyền Hạn (Permission) |
 | :--- | :--- | :--- |
+| `/jackpot testhappyhour` | Bắn thử thông báo Chat & âm thanh Giờ Vàng tức thì | `paperjackpot.admin` |
 | `/jackpot reload` | Reload lại cấu hình `config.yml` | `paperjackpot.admin` |
 | `/jackpot setpool <số_tiền>` | Thay đổi tổng Quỹ Hũ Server | `paperjackpot.admin` |
-| `/jackpot triggerjackpot <người_chơi>` | Ép buộc lượt quay tiếp theo của người chơi Nổ Hũ | `paperjackpot.admin` |
+| `/jackpot test` | Ép buộc lượt quay tiếp theo của người chơi Nổ Hũ | `paperjackpot.admin` |
 
 ---
 
