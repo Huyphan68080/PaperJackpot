@@ -18,7 +18,7 @@ import java.util.UUID;
 
 /**
  * HologramManager - Quản lý Hologram 3D Nổi Trực Tiếp Trong Thế Giới (TextDisplay native 1.19.4+ / 1.20+ / 1.21+).
- * Tự động cập nhật Bảng Xếp Hạng Top 10 Đại Gia Casino xoay mặt 360 độ về phía người chơi.
+ * Tự động cập nhật Bảng Xếp Hạng Top 10 Đại Gia Casino định dạng `#Rank Tên ≫ Tiền$` chuẩn đẹp.
  */
 public class HologramManager {
 
@@ -125,10 +125,10 @@ public class HologramManager {
         }
 
         if (displayEntity == null || !displayEntity.isValid()) {
-            removeHologramEntity(); // Dọn dẹp entity rác cũ nếu có
+            removeHologramEntity();
             try {
                 displayEntity = (TextDisplay) world.spawnEntity(holoLocation, EntityType.TEXT_DISPLAY);
-                displayEntity.setBillboard(TextDisplay.Billboard.CENTER); // Tự động xoay mặt 360 độ về người chơi
+                displayEntity.setBillboard(TextDisplay.Billboard.CENTER);
                 displayEntity.setSeeThrough(false);
                 displayEntity.setShadowed(true);
                 displayEntity.addScoreboardTag("paperjackpot_hologram");
@@ -139,26 +139,28 @@ public class HologramManager {
             }
         }
 
-        // Dựng nội dung Hologram 3D lộng lẫy
+        // Dựng nội dung Hologram 3D đẹp chuẩn theo định dạng `#Rank Tên ≫ Tiền$`
         StringBuilder sb = new StringBuilder();
-        sb.append("<gradient:gold:yellow><bold>✦ TOP ĐẠI GIA CASINO SORA ✦</bold></gradient>\n\n");
+        sb.append("<gradient:#FFD700:#FF8C00><bold>✦ TOP ĐẠI GIA CASINO NỔ HŨ ✦</bold></gradient>\n\n");
 
         if (databaseManager != null) {
             List<DatabaseManager.TopWinnerEntry> topList = databaseManager.getTopWinners(10);
             for (int i = 1; i <= 10; i++) {
+                String rankColor = switch (i) {
+                    case 1 -> "<gold><bold>#" + i + "</bold></gold>";
+                    case 2 -> "<gray><bold>#" + i + "</bold></gray>";
+                    case 3 -> "<gradient:#CD7F32:#8B4513><bold>#" + i + "</bold></gradient>";
+                    case 4, 5 -> "<yellow><bold>#" + i + "</bold></yellow>";
+                    default -> "<yellow>#" + i + "</yellow>";
+                };
+
                 if (i <= topList.size()) {
                     DatabaseManager.TopWinnerEntry entry = topList.get(i - 1);
-                    String rankColor = switch (i) {
-                        case 1 -> "<gold><bold>#" + i + "</bold></gold>";
-                        case 2 -> "<gray><bold>#" + i + "</bold></gray>";
-                        case 3 -> "<gradient:#CD7F32:#8B4513><bold>#" + i + "</bold></gradient>";
-                        default -> "<yellow>#" + i + "</yellow>";
-                    };
                     sb.append(rankColor)
                             .append(" <white><bold>").append(entry.name()).append("</bold></white>")
                             .append(" <gray>≫</gray> <green><bold>").append(ConfigManager.formatMoney(entry.totalPayout())).append("$</bold></green>\n");
                 } else {
-                    sb.append("<yellow>#").append(i).append("</yellow> <gray>---</gray> <gray>≫</gray> <gray>---</gray>\n");
+                    sb.append(rankColor).append(" <gray>---</gray> <gray>≫</gray> <green><bold>---</bold></green>\n");
                 }
             }
         } else {
