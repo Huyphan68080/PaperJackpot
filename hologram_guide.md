@@ -4,6 +4,29 @@ Tài liệu hướng dẫn chi tiết cách thiết lập và quản lý **Bản
 
 ---
 
+## 📸 HÌNH ẢNH GIAO DIỆN HOLOGRAM MẪU IN-GAME
+
+Bảng Xếp Hạng 3D nổi lơ lửng hiển thị chuẩn đẹp định dạng **`#Rank Tên ≫ Tiền$`**:
+
+```text
+✦ TOP ĐẠI GIA CASINO NỔ HŨ ✦
+
+#1 Im_Noah ≫ 32,500,000$
+#2 HACKER52 ≫ 25,110,000$
+#3 PE_M30W_54 ≫ 20,000,000$
+#4 xLanhNhuBang ≫ 1,320,000$
+#5 Yeagonn_ ≫ 1,000,000$
+#6 --- ≫ ---
+#7 --- ≫ ---
+#8 --- ≫ ---
+#9 --- ≫ ---
+#10 --- ≫ ---
+
+👉 Gõ /jackpot để tham gia Quay Hũ Nổ Hũ!
+```
+
+---
+
 ## 🌟 CÁCH 1: Hologram 3D Nổi Trực Tiếp (Tích Hợp Sẵn Trong Plugin)
 
 Plugin **PaperJackpot** tích hợp sẵn công nghệ **TextDisplay Native (Minecraft 1.19.4 / 1.20 / 1.21)**. Bạn **KHÔNG CẦN** cài đặt thêm bất kỳ plugin Hologram nào (như DecentHolograms hay HolographicDisplays) mà vẫn tạo được bảng 3D nổi cực đẹp.
@@ -19,6 +42,7 @@ Plugin **PaperJackpot** tích hợp sẵn công nghệ **TextDisplay Native (Min
 4. Bảng Xếp Hạng 3D Top 10 sẽ xuất hiện lơ lửng ngay vị trí bạn đứng.
 
 ### ✨ Đặc điểm nổi bật:
+- **Định dạng chuẩn đẹp**: Tên người chơi đứng cạnh số tiền thắng thưởng với ký tự phân cách `≫` đẳng cấp.
 - **Xoay mặt 360 độ**: Hologram sẽ tự động xoay mặt về phía người chơi đứng ở bất kỳ góc nhìn nào trong Lobby.
 - **Tự động cập nhật**: Dữ liệu Top 10 sẽ tự động làm mới mỗi 15 giây.
 - **Lưu vị trí tự động**: Tọa độ Hologram được tự động lưu vào `config.yml`. Dù khởi động lại Server hay Reload plugin thì Hologram vẫn giữ nguyên vị trí.
@@ -32,7 +56,7 @@ Khi muốn di chuyển hoặc xóa Bảng Xếp Hạng khỏi thế giới, bạ
 
 ---
 
-## 💎 CÁCH 2: Cấu Hình Với Plugin DecentHolograms / HolographicDisplays
+## 💎 CÁCH 2: Cấu HÌnh Với Plugin DecentHolograms / HolographicDisplays
 
 Nếu Server của bạn đã cài đặt plugin **DecentHolograms** hoặc **HolographicDisplays**, bạn có thể sử dụng các **PlaceholderAPI** của PaperJackpot để tự thiết kế giao diện Hologram theo ý muốn.
 
