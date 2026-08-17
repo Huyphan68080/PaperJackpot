@@ -29,8 +29,8 @@ public class PlayerStatsGui {
     }
 
     public void open(Player player) {
-        // Tiêu đề ngắn gọn không bị đè nút JEI
-        Component title = mm.deserialize("<gradient:gold:yellow><bold>📈 THỐNG KÊ CÁ NHÂN</bold></gradient>");
+        // Tiêu đề màu Xanh Lá Đậm tương phản nổi bật trên nền xám GUI container
+        Component title = mm.deserialize("<gradient:#006400:#00AA00><bold>📈 THỐNG KÊ CÁ NHÂN</bold></gradient>");
         Inventory gui = Bukkit.createInventory(null, 27, title);
 
         // Viền kính xám

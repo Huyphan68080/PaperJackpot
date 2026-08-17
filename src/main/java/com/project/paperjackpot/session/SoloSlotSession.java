@@ -290,15 +290,15 @@ public class SoloSlotSession {
         String happyHourText = isHappyHour ? " <gradient:#FF0000:#FFD700>🎆 GIỜ VÀNG (20H-21H): TĂNG TỶ LỆ NỔ HŨ X2!</gradient>" : "";
 
         ItemStack jackpotItem = buildItem(Material.NETHERITE_BLOCK,
-                "<gradient:#FF0000:#FFD700><bold>🔥 QUỸ HŨ TÍCH LŨY SERVER 🔥</bold></gradient>",
+                "<gradient:#FF0000:#FFD700><bold>🔥 QUỸ JACKPOT TÍCH LŨY SERVER 🔥</bold></gradient>",
                 List.of(
                         "",
-                        " <yellow>Tổng tiền Hũ hiện tại: <gold><bold>" + ConfigManager.formatMoney(pool) + "$</bold></gold>",
+                        " <yellow>Tổng Quỹ Jackpot hiện tại: <gold><bold>" + ConfigManager.formatMoney(pool) + "$</bold></gold>",
                         " <gray>Tất cả tiền thua cược của server",
-                        " <gray>đều được tích lũy 100% thẳng vào hũ này!",
+                        " <gray>đều được tích lũy 100% thẳng vào Quỹ Jackpot!",
                         happyHourText,
                         "",
-                        " <gradient:#FF0000:#FFD700>🔥 3x Netherite (NTR) = THƯỞNG X5 + HỐT SẠCH HŨ!</gradient>"
+                        " <gradient:#FF0000:#FFD700>🔥 3x Netherite (NTR) = THƯỞNG X5 + HỐT SẠCH QUỸ JACKPOT!</gradient>"
                 ));
         gui.setItem(4, jackpotItem);
     }

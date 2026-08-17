@@ -28,7 +28,8 @@ public class PersonalHistoryGui {
     }
 
     public void open(Player player) {
-        Component title = mm.deserialize("<gradient:gold:yellow><bold>📜 LỊCH SỬ CƯỢC CÁ NHÂN</bold></gradient>");
+        // Tiêu đề Đỏ Đô đậm tương phản sắc nét trên nền xám GUI container
+        Component title = mm.deserialize("<gradient:#8B0000:#D2143A><bold>📜 LỊCH SỬ CƯỢC CÁ NHÂN</bold></gradient>");
         Inventory gui = Bukkit.createInventory(null, 27, title);
 
         // Viền kính xám

@@ -10,14 +10,14 @@ settings:
   # Thuế suất trên tiền thưởng (0.10 = 10% thuế)
   tax-rate: 0.10
 
-  # Hệ số thưởng: Tất cả khoáng sản thắng thường là x2.0, Nổ Hũ Jackpot là x5.0 + Quỹ Hũ
+  # Hệ số thưởng: Tất cả khoáng sản thắng thường là x2.0, Nổ Hũ Jackpot là x5.0 + Quỹ Jackpot
   normal-win-multiplier: 2.0
   jackpot-multiplier: 5.0
 
-  # Tiêu đề giao diện GUI Quay Hũ (Ngắn gọn để không bị đè nút JEI)
-  gui-title: "<gradient:gold:yellow><bold>🎰 CASINO NỔ HŨ</bold></gradient>"
+  # Tiêu đề giao diện GUI Quay Hũ (Màu Đỏ Đô Đậm #8B0000 tương phản sắc nét trên nền xám GUI)
+  gui-title: "<gradient:#8B0000:#D2143A><bold>🎰 CASINO NỔ HŨ</bold></gradient>"
 
-  # Hiển thị BossBar Quỹ Hũ Tích Lũy toàn server cho mọi người chơi online
+  # Hiển thị BossBar Quỹ Jackpot Tích Lũy toàn server cho mọi người chơi online
   global-bossbar: true
 
   # Thưởng Đua Top Thần Tài hằng tuần (Tự động trao thưởng vào 23:59 Chủ Nhật theo giờ Việt Nam)
@@ -90,16 +90,16 @@ messages:
   not-enough-money: "<red>❌ Bạn không đủ tiền! Cần tối thiểu {amount}$ để quay lượt này.</red>"
   welcome-dealer: "<gradient:gold:yellow><bold>🤖 [CASINO DEALER]</bold></gradient> <yellow>Kính chúc <gold><bold>Ông Chủ / Bà Chủ {player}</bold></gold> quay hũ phát tài, may mắn phát lộc và trúng đại lễ Jackpot! 🎉</yellow>"
   win: "<green>🎉 TRÚNG! 3x {item} (x2.0) | Cược: {bet}$ → Thưởng: {gross}$ - Thuế (10%): {tax}$ = Nhận thực tế: {net}$</green>"
-  lose: "<red>❌ Không trúng! Mất {amount}$ cược. (Tiền thua đã nạp 100% vào Quỹ Hũ Server)</red>"
-  jackpot-win: "<gradient:#FF0000:#FFD700><bold>🔥 JACKPOT NỔ HŨ X5 + QUỸ HŨ! Cược: {bet}$ → Nhận: {gross}$ - Thuế (10%): {tax}$ = Nhận thực tế: {net}$ 🔥</bold></gradient>"
+  lose: "<red>❌ Không trúng! Mất {amount}$ cược. (Tiền thua đã nạp 100% vào Quỹ Jackpot Server)</red>"
+  jackpot-win: "<gradient:#FF0000:#FFD700><bold>🔥 JACKPOT NỔ HŨ X5 + QUỸ JACKPOT! Cược: {bet}$ → Nhận: {gross}$ - Thuế (10%): {tax}$ = Nhận thực tế: {net}$ 🔥</bold></gradient>"
 
   # Thông báo Sự Kiện Giờ Vàng Casino qua Chat (Múi giờ Việt Nam UTC+7)
   happy-hour-start: |
     
     <gradient:#FFD700:#FF4500><bold>🎆 [CASINO] SỰ KIỆN GIỜ VÀNG ĐÃ BẮT ĐẦU! 🎆</bold></gradient>
     <yellow>⏰ Khung giờ vàng từ <gold><bold>{start}:00</bold></gold> đến <gold><bold>{end}:00</bold></gold> (Giờ Việt Nam UTC+7)!</yellow>
-    <yellow>🔥 Quỹ Hũ hiện tại: <gold><bold>{pool}$</bold></gold> | Nhận ngay <gradient:#FF0000:#FFD700><bold>X2 TỶ LỆ NỔ HŨ JACKPOT</bold></gradient>!</yellow>
-    <yellow>👉 Nhanh tay gõ <gold><bold>/jackpot</bold></gold> để hốt trọn Quỹ Hũ ngay kẻo lỡ!</yellow>
+    <yellow>🔥 Quỹ Jackpot hiện tại: <gold><bold>{pool}$</bold></gold> | Nhận ngay <gradient:#FF0000:#FFD700><bold>X2 TỶ LỆ NỔ HŨ JACKPOT</bold></gradient>!</yellow>
+    <yellow>👉 Nhanh tay gõ <gold><bold>/jackpot</bold></gold> để hốt trọn Quỹ Jackpot ngay kẻo lỡ!</yellow>
     
 
   happy-hour-end: |

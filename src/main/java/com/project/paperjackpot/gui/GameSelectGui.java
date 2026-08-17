@@ -30,12 +30,12 @@ public class GameSelectGui {
         this.plugin = plugin;
         this.jackpotManager = plugin.getJackpotManager();
 
-        Component title = mm.deserialize("<gradient:gold:yellow><bold>🎰 CASINO NỔ HŨ JACKPOT</bold></gradient>");
+        Component title = mm.deserialize("<gradient:#8B0000:#D2143A><bold>🎰 CASINO NỔ HŨ JACKPOT</bold></gradient>");
         this.titlePlain = PlainTextComponentSerializer.plainText().serialize(title);
     }
 
     public void open(Player player) {
-        Component title = mm.deserialize("<gradient:gold:yellow><bold>🎰 CASINO NỔ HŨ JACKPOT</bold></gradient>");
+        Component title = mm.deserialize("<gradient:#8B0000:#D2143A><bold>🎰 CASINO NỔ HŨ JACKPOT</bold></gradient>");
         Inventory gui = Bukkit.createInventory(null, 54, title);
 
         // Hàng 1 (0-8) & Hàng 6 (45-53): Kính đen trang trí
@@ -47,20 +47,20 @@ public class GameSelectGui {
         // Viền hai bên
         int[] sideSlots = {9, 17, 18, 26, 27, 35, 36, 44};
         for (int s : sideSlots) {
-            gui.setItem(s, createDecorPane(Material.YELLOW_STAINED_GLASS_PANE));
+            gui.setItem(s, createDecorPane(Material.RED_STAINED_GLASS_PANE));
         }
 
-        // Slot 13 (Hàng 2 giữa): NỔI BẬT TỔNG QUỸ HŨ TÍCH LŨY SERVER
+        // Slot 13 (Hàng 2 giữa): NỔI BẬT TỔNG QUỸ JACKPOT TÍCH LŨY SERVER
         double pool = jackpotManager.getJackpotPool();
         ItemStack jackpotPoolCard = buildItem(Material.NETHERITE_BLOCK,
-                "<gradient:#FF0000:#FFD700><bold>🔥 QUỸ HŨ TÍCH LŨY SERVER 🔥</bold></gradient>",
+                "<gradient:#FF0000:#FFD700><bold>🔥 QUỸ JACKPOT TÍCH LŨY SERVER 🔥</bold></gradient>",
                 List.of(
                         "",
-                        " <yellow>Tổng số tiền Quỹ Hũ hiện tại: <gold><bold>" + ConfigManager.formatMoney(pool) + "$</bold></gold>",
+                        " <yellow>Tổng số tiền Quỹ Jackpot hiện tại: <gold><bold>" + ConfigManager.formatMoney(pool) + "$</bold></gold>",
                         " <gray>Tất cả tiền thua cược của server",
                         " <gray>đều được tích lũy 100% thẳng vào Quỹ này!",
                         "",
-                        " <gradient:#FF0000:#FFD700>🔥 Quay trúng Jackpot = HỐT TRỌN CẢ QUỸ HŨ!</gradient>"
+                        " <gradient:#FF0000:#FFD700>🔥 Quay trúng Jackpot = HỐT TRỌN QUỸ JACKPOT!</gradient>"
                 ));
         gui.setItem(13, jackpotPoolCard);
 
@@ -88,7 +88,7 @@ public class GameSelectGui {
                         " <gray>2. Vào phòng chơi cá nhân, chọn mức cược (1k - 500k).",
                         " <gray>3. Bấm Quay cược. Đặt cược là quay ngay không cần chờ!",
                         " <gray>4. Khi thua cược, tiền thua sẽ được nạp thẳng vào Hũ.",
-                        " <gray>5. Quay trúng biểu tượng đặc biệt = Hốt trọn Quỹ Hũ!",
+                        " <gray>5. Quay trúng biểu tượng đặc biệt = Hốt trọn Quỹ Jackpot!",
                         ""
                 ));
         gui.setItem(49, infoCard);

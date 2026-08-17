@@ -34,9 +34,9 @@ public class JackpotManager {
             this.currentPool = defaultPool;
         }
 
-        // Khởi tạo BossBar Server Real-Time
+        // Khởi tạo BossBar Server Real-Time với tiêu đề QUỸ JACKPOT TÍCH LŨY SERVER
         this.globalBossBar = BossBar.bossBar(
-                configManager.getMiniMessage().deserialize("<gradient:#FF0000:#FFD700><bold>🔥 QUỸ HŨ TÍCH LŨY SERVER: " + ConfigManager.formatMoney(currentPool) + "$ 🔥</bold></gradient>"),
+                configManager.getMiniMessage().deserialize("<gradient:#FF0000:#FFD700><bold>🔥 QUỸ JACKPOT TÍCH LŨY SERVER: " + ConfigManager.formatMoney(currentPool) + "$ 🔥</bold></gradient>"),
                 1.0f,
                 BossBar.Color.PURPLE,
                 BossBar.Overlay.PROGRESS
@@ -89,7 +89,7 @@ public class JackpotManager {
 
     public void updateGlobalBossBar() {
         if (!configManager.isGlobalBossbarEnabled()) return;
-        globalBossBar.name(configManager.getMiniMessage().deserialize("<gradient:#FF0000:#FFD700><bold>🔥 QUỸ HŨ TÍCH LŨY SERVER: " + ConfigManager.formatMoney(currentPool) + "$ 🔥</bold></gradient>"));
+        globalBossBar.name(configManager.getMiniMessage().deserialize("<gradient:#FF0000:#FFD700><bold>🔥 QUỸ JACKPOT TÍCH LŨY SERVER: " + ConfigManager.formatMoney(currentPool) + "$ 🔥</bold></gradient>"));
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.showBossBar(globalBossBar);
         }

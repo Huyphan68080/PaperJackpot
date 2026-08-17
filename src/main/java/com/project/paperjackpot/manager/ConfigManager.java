@@ -73,7 +73,7 @@ public class ConfigManager {
         taxRate = config.getDouble("settings.tax-rate", 0.10);
         normalWinMultiplier = config.getDouble("settings.normal-win-multiplier", 2.0);
         jackpotMultiplier = config.getDouble("settings.jackpot-multiplier", 5.0);
-        guiTitle = config.getString("settings.gui-title", "<gradient:gold:yellow><bold>🎰 CASINO NỔ HŨ</bold></gradient>");
+        guiTitle = config.getString("settings.gui-title", "<gradient:#8B0000:#D2143A><bold>🎰 CASINO NỔ HŨ</bold></gradient>");
 
         globalBossbar = config.getBoolean("settings.global-bossbar", true);
         weeklyRewardsEnabled = config.getBoolean("settings.weekly-rewards.enabled", true);
