@@ -113,8 +113,15 @@ Người chơi Minecraft PE (Pocket Edition) di động truy cập qua Geyser/Fl
 
 ---
 
-## 🛡️ Tác Giả & Hỗ Trợ
+## ✦ Hướng Dẫn Cấu Hình Hologram 3D Top 10
 
-- **Tác Giả / Phát Triển**: Huy Phan
-- **Phiên Bản**: `1.0.0`
-- **Giấy Phép**: MIT License
+Chi tiết cách đặt Bảng Xếp Hạng 3D nổi trong game (`/jackpot sethologram`) hoặc cấu hình với DecentHolograms qua PlaceholderAPI xem tại:
+📄 **[hologram_guide.md](file:///d:/PaperJackpot/hologram_guide.md)**
+
+---
+
+## 👨‍💻 Thông Tin Tác Giả & Bản Quyền
+
+- **Đội Ngũ Phát Triển**: **Huy Phan**
+- **Website/GitHub**: [https://github.com/Huyphan68080/PaperJackpot](https://github.com/Huyphan68080/PaperJackpot)
+- **Phiên Bản**: 1.0.0 (Paper 1.21.1 Compatible)
