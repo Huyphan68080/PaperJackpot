@@ -5,6 +5,7 @@ import com.project.paperjackpot.database.DatabaseManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -18,7 +19,7 @@ import java.util.UUID;
 
 /**
  * HologramManager - Quản lý Hologram 3D Nổi Trực Tiếp Trong Thế Giới (TextDisplay native 1.19.4+ / 1.20+ / 1.21+).
- * Tự động cập nhật Bảng Xếp Hạng Top 10 Đại Gia Casino định dạng `#Rank Tên ≫ Tiền$` chuẩn đẹp.
+ * Nền trong suốt 100%, bóng chữ sắc nét, tự động xoay 360 độ về phía người chơi.
  */
 public class HologramManager {
 
@@ -129,8 +130,8 @@ public class HologramManager {
             try {
                 displayEntity = (TextDisplay) world.spawnEntity(holoLocation, EntityType.TEXT_DISPLAY);
                 displayEntity.setBillboard(TextDisplay.Billboard.CENTER);
-                displayEntity.setSeeThrough(false);
-                displayEntity.setShadowed(true);
+                displayEntity.setBackgroundColor(Color.fromARGB(0, 0, 0, 0)); // Nền trong suốt 100% không bị ô đen bao quanh!
+                displayEntity.setShadowed(true); // Bóng chữ nổi 3D cực đẹp
                 displayEntity.addScoreboardTag("paperjackpot_hologram");
                 this.holoEntityUuid = displayEntity.getUniqueId();
             } catch (Exception e) {
@@ -139,28 +140,30 @@ public class HologramManager {
             }
         }
 
-        // Dựng nội dung Hologram 3D đẹp chuẩn theo định dạng `#Rank Tên ≫ Tiền$`
+        // Cập nhật cấu hình hiển thị
+        displayEntity.setBackgroundColor(Color.fromARGB(0, 0, 0, 0));
+        displayEntity.setShadowed(true);
+        displayEntity.setBillboard(TextDisplay.Billboard.CENTER);
+
+        // Dựng nội dung Hologram 3D lộng lẫy
         StringBuilder sb = new StringBuilder();
-        sb.append("<gradient:#FFD700:#FF8C00><bold>✦ TOP ĐẠI GIA CASINO NỔ HŨ ✦</bold></gradient>\n\n");
+        sb.append("<gradient:#FFD700:#FFA500><bold>✦ TOP ĐẠI GIA CASINO NỔ HŨ ✦</bold></gradient>\n\n");
 
         if (databaseManager != null) {
             List<DatabaseManager.TopWinnerEntry> topList = databaseManager.getTopWinners(10);
             for (int i = 1; i <= 10; i++) {
-                String rankColor = switch (i) {
-                    case 1 -> "<gold><bold>#" + i + "</bold></gold>";
-                    case 2 -> "<gray><bold>#" + i + "</bold></gray>";
-                    case 3 -> "<gradient:#CD7F32:#8B4513><bold>#" + i + "</bold></gradient>";
-                    case 4, 5 -> "<yellow><bold>#" + i + "</bold></yellow>";
-                    default -> "<yellow>#" + i + "</yellow>";
-                };
-
                 if (i <= topList.size()) {
                     DatabaseManager.TopWinnerEntry entry = topList.get(i - 1);
-                    sb.append(rankColor)
-                            .append(" <white><bold>").append(entry.name()).append("</bold></white>")
-                            .append(" <gray>≫</gray> <green><bold>").append(ConfigManager.formatMoney(entry.totalPayout())).append("$</bold></green>\n");
+                    String rankPrefix = switch (i) {
+                        case 1 -> "<gold><bold>#1</bold></gold> <white><bold>" + entry.name() + "</bold></white> <gray>≫</gray> <green><bold>" + ConfigManager.formatMoney(entry.totalPayout()) + "$</bold></green>";
+                        case 2 -> "<gray><bold>#2</bold></gray> <white><bold>" + entry.name() + "</bold></white> <gray>≫</gray> <green><bold>" + ConfigManager.formatMoney(entry.totalPayout()) + "$</bold></green>";
+                        case 3 -> "<gradient:#CD7F32:#8B4513><bold>#3</bold></gradient> <white><bold>" + entry.name() + "</bold></white> <gray>≫</gray> <green><bold>" + ConfigManager.formatMoney(entry.totalPayout()) + "$</bold></green>";
+                        case 4, 5 -> "<yellow><bold>#" + i + "</bold></yellow> <white>" + entry.name() + "</white> <gray>≫</gray> <green>" + ConfigManager.formatMoney(entry.totalPayout()) + "$</green>";
+                        default -> "<gray>#" + i + "</gray> <white>" + entry.name() + "</white> <gray>≫</gray> <green>" + ConfigManager.formatMoney(entry.totalPayout()) + "$</green>";
+                    };
+                    sb.append(rankPrefix).append("\n");
                 } else {
-                    sb.append(rankColor).append(" <gray>---</gray> <gray>≫</gray> <green><bold>---</bold></green>\n");
+                    sb.append("<dark_gray>#").append(i).append(" --- ≫ ---</dark_gray>\n");
                 }
             }
         } else {
