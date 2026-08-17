@@ -6,6 +6,7 @@ import com.project.paperjackpot.game.GameMode;
 import com.project.paperjackpot.listener.MenuListener;
 import com.project.paperjackpot.manager.ConfigManager;
 import com.project.paperjackpot.manager.HappyHourManager;
+import com.project.paperjackpot.manager.HologramManager;
 import com.project.paperjackpot.manager.JackpotManager;
 import com.project.paperjackpot.manager.SeasonManager;
 import com.project.paperjackpot.placeholder.PaperJackpotExpansion;
@@ -30,6 +31,7 @@ public class PaperJackpot extends JavaPlugin {
     private JackpotManager jackpotManager;
     private SeasonManager seasonManager;
     private HappyHourManager happyHourManager;
+    private HologramManager hologramManager;
     private JackpotCommand jackpotCommand;
 
     // Quản lý phiên chơi cá nhân của người chơi online
@@ -43,6 +45,7 @@ public class PaperJackpot extends JavaPlugin {
         jackpotManager = new JackpotManager(this);
         seasonManager = new SeasonManager(this);
         happyHourManager = new HappyHourManager(this);
+        hologramManager = new HologramManager(this);
 
         // Hook Vault Economy (Không disable plugin nếu Vault load chậm)
         setupEconomy();
@@ -50,7 +53,7 @@ public class PaperJackpot extends JavaPlugin {
         // Đăng ký PlaceholderAPI Expansion nếu server cài PlaceholderAPI
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new PaperJackpotExpansion(this).register();
-            getLogger().info("📊 Đã đăng ký PlaceholderAPI Expansion (%paperjackpot_pool%, %paperjackpot_last_winner%, %paperjackpot_my_total_wins%)!");
+            getLogger().info("📊 Đã đăng ký PlaceholderAPI Expansion (%paperjackpot_pool%, %paperjackpot_top_1_name%, %paperjackpot_top_1_amount%)!");
         }
 
         // Đăng ký command & listener
@@ -84,6 +87,9 @@ public class PaperJackpot extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (hologramManager != null) {
+            hologramManager.stop();
+        }
         if (happyHourManager != null) {
             happyHourManager.stop();
         }
@@ -137,5 +143,6 @@ public class PaperJackpot extends JavaPlugin {
     public JackpotManager getJackpotManager() { return jackpotManager; }
     public SeasonManager getSeasonManager() { return seasonManager; }
     public HappyHourManager getHappyHourManager() { return happyHourManager; }
+    public HologramManager getHologramManager() { return hologramManager; }
     public JackpotCommand getJackpotCommand() { return jackpotCommand; }
 }

@@ -44,20 +44,27 @@ Lệnh chính: `/jackpot` (Lệnh phụ: `/jp`, `/quayhu`, `/no-hu`, `/casino`)
 
 | Lệnh | Mô Tả | Quyền Hạn (Permission) |
 | :--- | :--- | :--- |
+| `/jackpot sethologram` | Tạo Bảng Xếp Hạng Top 10 3D nổi mượt mà trong thế giới | `paperjackpot.admin` |
+| `/jackpot removehologram` | Xóa Bảng Xếp Hạng Top 10 3D nổi khỏi thế giới | `paperjackpot.admin` |
 | `/jackpot testhappyhour` | Bắn thử thông báo Chat & âm thanh Giờ Vàng tức thì | `paperjackpot.admin` |
 | `/jackpot reload` | Reload lại cấu hình `config.yml` | `paperjackpot.admin` |
-| `/jackpot setpool <số_tiền>` | Thay đổi tổng Quỹ Hũ Server | `paperjackpot.admin` |
+| `/jackpot setpool <số_tiền>` | Thay đổi tổng Quỹ Jackpot Server | `paperjackpot.admin` |
 | `/jackpot test` | Ép buộc lượt quay tiếp theo của người chơi Nổ Hũ | `paperjackpot.admin` |
 
 ---
 
 ## 🧩 PlaceholderAPI Expansion
 
-PaperJackpot hỗ trợ tích hợp sẵn với **PlaceholderAPI** để hiển thị thông số Quỹ Hũ lên Scoreboard, TAB, Hologram hoặc Chat:
+PaperJackpot hỗ trợ tích hợp sẵn với **PlaceholderAPI** để hiển thị thông số Quỹ Hũ và Top 10 Đại Gia lên Scoreboard, TAB, DecentHolograms hoặc Chat:
 
 | Placeholder | Mô Tả | Ví Dụ Đầu Ra |
 | :--- | :--- | :--- |
-| `%paperjackpot_pool%` | Quỹ Hũ Server đã định dạng dấu phẩy | `1,250,000` |
+| `%paperjackpot_pool%` | Quỹ Jackpot Server đã định dạng dấu phẩy | `1,250,000$` |
+| `%paperjackpot_last_winner%` | Tên người vừa Nổ Hũ Jackpot gần nhất | `HuyPhan` |
+| `%paperjackpot_top_1_name%` | Tên người chơi đứng Top 1 Casino | `Im_Noah` |
+| `%paperjackpot_top_1_amount%` | Số tiền thắng thưởng của Top 1 | `32,500,000$` |
+| `%paperjackpot_top_2_name%` ... `%paperjackpot_top_10_name%` | Tên người chơi đứng Top 2 đến Top 10 | `HACKER52` |
+| `%paperjackpot_top_2_amount%` ... `%paperjackpot_top_10_amount%` | Tiền thưởng Top 2 đến Top 10 | `25,110,000$` |
 | `%paperjackpot_pool_raw%` | Số tiền Quỹ Hũ dạng số thô | `1250000.0` |
 | `%paperjackpot_last_winner%` | Tên người chơi vừa Nổ Hũ gần nhất | `HuyPhan` |
 | `%paperjackpot_my_total_wins%` | Tổng số ván thắng của bản thân người chơi | `42` |
