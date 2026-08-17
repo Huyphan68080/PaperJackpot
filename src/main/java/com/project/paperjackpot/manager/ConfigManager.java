@@ -8,12 +8,13 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.text.DecimalFormat;
-import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * ConfigManager - Quản lý config.yml (Happy Hour Messages, Streak Bonus, BossBar Server, Weekly Rewards).
+ * ConfigManager - Quản lý config.yml (Tự động nhận diện Múi giờ Việt Nam Asia/Ho_Chi_Minh UTC+7 dù Server đặt tại Singapore / Châu Âu / Mỹ).
  */
 public class ConfigManager {
 
@@ -34,6 +35,8 @@ public class ConfigManager {
     private double top3Reward;
 
     private boolean happyHourEnabled;
+    private String timezoneStr;
+    private ZoneId timezone;
     private int happyHourStart;
     private int happyHourEnd;
 
@@ -79,6 +82,14 @@ public class ConfigManager {
         top3Reward = config.getDouble("settings.weekly-rewards.top3-reward", 100000.0);
 
         happyHourEnabled = config.getBoolean("settings.happy-hour.enabled", true);
+        timezoneStr = config.getString("settings.happy-hour.timezone", "Asia/Ho_Chi_Minh");
+        try {
+            timezone = ZoneId.of(timezoneStr);
+        } catch (Exception e) {
+            timezone = ZoneId.of("Asia/Ho_Chi_Minh");
+            plugin.getLogger().warning("[Config] Múi giờ không hợp lệ: " + timezoneStr + ", tự động dùng Asia/Ho_Chi_Minh (UTC+7)");
+        }
+
         happyHourStart = config.getInt("settings.happy-hour.start-hour", 20);
         happyHourEnd = config.getInt("settings.happy-hour.end-hour", 21);
 
@@ -109,16 +120,23 @@ public class ConfigManager {
         loseMsg = config.getString("messages.lose", "<red>❌ Không trúng! Mất {amount}$ cược. (Tiền thua đã nạp 100% vào Quỹ Hũ Server)</red>");
         jackpotWinMsg = config.getString("messages.jackpot-win", "<gradient:#FF0000:#FFD700><bold>🔥 JACKPOT NỔ HŨ X5 + QUỸ HŨ! Cược: {bet}$ → Nhận: {gross}$ - Thuế (10%): {tax}$ = Nhận thực tế: {net}$ 🔥</bold></gradient>");
 
-        happyHourStartMsg = config.getString("messages.happy-hour-start", "\n<gradient:#FFD700:#FF4500><bold>🎆 [CASINO] SỰ KIỆN GIỜ VÀNG ĐÃ BẮT ĐẦU! 🎆</bold></gradient>\n<yellow>⏰ Khung giờ vàng từ <gold><bold>{start}:00</bold></gold> đến <gold><bold>{end}:00</bold></gold> hằng ngày!</yellow>\n<yellow>🔥 Quỹ Hũ hiện tại: <gold><bold>{pool}$</bold></gold> | Nhận ngay <gradient:#FF0000:#FFD700><bold>X2 TỶ LỆ NỔ HŨ JACKPOT</bold></gradient>!</yellow>\n<yellow>👉 Nhanh tay gõ <gold><bold>/jackpot</bold></gold> để hốt trọn Quỹ Hũ ngay kẻo lỡ!</yellow>\n");
+        happyHourStartMsg = config.getString("messages.happy-hour-start", "\n<gradient:#FFD700:#FF4500><bold>🎆 [CASINO] SỰ KIỆN GIỜ VÀNG ĐÃ BẮT ĐẦU! 🎆</bold></gradient>\n<yellow>⏰ Khung giờ vàng từ <gold><bold>{start}:00</bold></gold> đến <gold><bold>{end}:00</bold></gold> (Giờ Việt Nam UTC+7)!</yellow>\n<yellow>🔥 Quỹ Hũ hiện tại: <gold><bold>{pool}$</bold></gold> | Nhận ngay <gradient:#FF0000:#FFD700><bold>X2 TỶ LỆ NỔ HŨ JACKPOT</bold></gradient>!</yellow>\n<yellow>👉 Nhanh tay gõ <gold><bold>/jackpot</bold></gold> để hốt trọn Quỹ Hũ ngay kẻo lỡ!</yellow>\n");
         happyHourEndMsg = config.getString("messages.happy-hour-end", "\n<gradient:#FF4500:#FFD700><bold>⏰ [CASINO] SỰ KIỆN GIỜ VÀNG ĐÃ KẾT THÚC! ⏰</bold></gradient>\n<yellow>Khung giờ vàng Nổ Hũ hôm nay đã chính thức khép lại. Cảm ơn các Đại Gia đã tham gia!</yellow>\n<yellow>🎉 Hẹn gặp lại các chủ hũ vào <gold><bold>{start}:00 ngày mai</bold></gold> nhé!</yellow>\n");
 
-        plugin.getLogger().info("[Config] Đã load cấu hình PaperJackpot thành công!");
+        plugin.getLogger().info("[Config] Đã load cấu hình PaperJackpot (Múi giờ: " + timezone.getId() + ") thành công!");
     }
 
+    /**
+     * Lấy giờ hiện tại theo đúng Múi Giờ Việt Nam (Asia/Ho_Chi_Minh UTC+7) bất kể Server đặt tại nước nào!
+     */
     public boolean isHappyHourActive() {
         if (!happyHourEnabled) return false;
-        int currentHour = LocalTime.now().getHour();
+        int currentHour = ZonedDateTime.now(timezone).getHour();
         return currentHour >= happyHourStart && currentHour < happyHourEnd;
+    }
+
+    public ZonedDateTime getNowInTimezone() {
+        return ZonedDateTime.now(timezone);
     }
 
     // === Getters ===
@@ -138,6 +156,7 @@ public class ConfigManager {
     public double getTop3Reward() { return top3Reward; }
 
     public boolean isHappyHourEnabled() { return happyHourEnabled; }
+    public ZoneId getTimezone() { return timezone; }
     public int getHappyHourStart() { return happyHourStart; }
     public int getHappyHourEnd() { return happyHourEnd; }
 
