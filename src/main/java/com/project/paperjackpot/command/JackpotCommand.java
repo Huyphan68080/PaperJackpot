@@ -152,13 +152,14 @@ public class JackpotCommand implements CommandExecutor {
             return true;
         }
 
-        // Mở Giao Diện Chọn Trò Chơi Nổ Hũ Casino
+        // Vào thẳng phòng Quay Hũ Nổ Hũ cá nhân
         if (!(sender instanceof Player player)) {
             sender.sendMessage(mm.deserialize("<red>Chỉ người chơi trong game mới có thể chơi Nổ Hũ Jackpot!</red>"));
             return true;
         }
 
-        new GameSelectGui(plugin).open(player);
+        SoloSlotSession session = plugin.getOrCreateSession(player, GameMode.MINERAL_SLOT);
+        session.open(true);
         return true;
     }
 
