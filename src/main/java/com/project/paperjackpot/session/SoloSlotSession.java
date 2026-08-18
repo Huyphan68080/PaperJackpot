@@ -27,6 +27,7 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * SoloSlotSession - Quản lý phiên chơi Quay Hũ Nổ Hũ 3x3 Cá Nhân (Single Player Instance).
  * Hỗ trợ 3 Chế Độ Nguồn Tiền: TIỀN VAULT ($), VÉ QUAY THƯỜNG (1K-100K), VÉ VIP HIGHROLLER (500K$).
+ * Tính thuế 10%, Nạp 100% tiền thua vào Quỹ Jackpot Server khi chơi bằng tiền Vault ($).
  */
 public class SoloSlotSession {
 
@@ -146,17 +147,17 @@ public class SoloSlotSession {
         // Slot 40: 📜 LỊCH SỬ CƯỢC CÁ NHÂN
         updateHistoryButtonItem();
 
-        // Slot 41: ⚡ AUTO SPIN
+        // Slot 41: 🎫 VÍ VÉ VIP HIGHROLLER
+        updateVipTicketItem();
+
+        // Slot 42: ⚡ AUTO SPIN
         updateAutoSpinItem();
 
-        // Slot 42: 💳 NÚT CHỌN CHẾ ĐỘ NGUỒN TIỀN (Tiền Vault $ / Vé Thường / Vé VIP)
+        // Slot 43: 💳 NÚT CHỌN CHẾ ĐỘ NGUỒN TIỀN (Tiền Vault $ / Vé Thường / Vé VIP)
         updatePaymentModeItem();
 
-        // Slot 43: 🎟️ VÍ VÉ THƯỜNG
+        // Slot 44: 🎟️ VÍ VÉ THƯỜNG
         updateTicketItem();
-
-        // Slot 44: 🎫 VÍ VÉ VIP HIGHROLLER
-        updateVipTicketItem();
 
         // HÀNG NÚT THAO TÁC CƯỢC & QUAY (Slots 45-53)
         updateBetButtons();
@@ -172,7 +173,7 @@ public class SoloSlotSession {
     public void updatePaymentModeItem() {
         switch (paymentMode) {
             case VAULT_MONEY -> {
-                gui.setItem(42, buildItem(Material.EMERALD_BLOCK,
+                gui.setItem(43, buildItem(Material.EMERALD_BLOCK,
                         "<gradient:#00AA00:#55FF55><bold>💳 CHẾ ĐỘ: DÙNG TIỀN VAULT ($)</bold></gradient>",
                         List.of(
                                 "",
@@ -198,7 +199,7 @@ public class SoloSlotSession {
                     ).stream().map(mm::deserialize).toList());
                     item.setItemMeta(meta);
                 }
-                gui.setItem(42, item);
+                gui.setItem(43, item);
             }
             case VIP_TICKET -> {
                 int count = databaseManager != null ? databaseManager.getVipTickets(player.getUniqueId()) : 0;
@@ -216,7 +217,7 @@ public class SoloSlotSession {
                     ).stream().map(mm::deserialize).toList());
                     item.setItemMeta(meta);
                 }
-                gui.setItem(42, item);
+                gui.setItem(43, item);
             }
         }
     }
@@ -294,7 +295,7 @@ public class SoloSlotSession {
 
     public void updateAutoSpinItem() {
         if (isAutoSpinning) {
-            gui.setItem(41, buildItem(Material.REDSTONE_TORCH,
+            gui.setItem(42, buildItem(Material.REDSTONE_TORCH,
                     "<red><bold>⚡ TẮT QUAY TỰ ĐỘNG (AUTO)</bold></red>",
                     List.of(
                             "",
@@ -304,7 +305,7 @@ public class SoloSlotSession {
                             " <red>👉 CLICK ĐỂ DỪNG QUAY TỰ ĐỘNG!"
                     )));
         } else {
-            gui.setItem(41, buildItem(Material.LEVER,
+            gui.setItem(42, buildItem(Material.LEVER,
                     "<gradient:gold:yellow><bold>⚡ BẬT QUAY TỰ ĐỘNG (AUTO)</bold></gradient>",
                     List.of(
                             "",
@@ -486,7 +487,7 @@ public class SoloSlotSession {
             meta.lore(rawLore.stream().map(mm::deserialize).toList());
             ticketItem.setItemMeta(meta);
         }
-        gui.setItem(43, ticketItem);
+        gui.setItem(44, ticketItem);
     }
 
     public void updateVipTicketItem() {
@@ -506,7 +507,7 @@ public class SoloSlotSession {
             meta.lore(rawLore.stream().map(mm::deserialize).toList());
             vipItem.setItemMeta(meta);
         }
-        gui.setItem(44, vipItem);
+        gui.setItem(41, vipItem);
     }
 
     public void updateJackpotHUD() {
@@ -598,6 +599,7 @@ public class SoloSlotSession {
                     "<gradient:#FF0000:#FFD700><bold>🎫 [VÉ VIP HIGHROLLER]</bold></gradient> <green>Đã dùng 1x Vé VIP Highroller cho mức cược Tối Đa <gold><bold>500,000$</bold></gold>! (Còn lại: <gold><bold>" + remaining + " vé VIP</bold></gold>)</green>"
             ));
         } else {
+            // Thanh toán bằng tiền mặt Vault ($)
             Economy economy = plugin.getEconomy();
             if (economy == null || !economy.has(player, currentBetAmount)) {
                 player.sendMessage(configManager.getNotEnoughMoneyMsg(currentBetAmount));
@@ -644,8 +646,8 @@ public class SoloSlotSession {
         double roll = rand.nextDouble(100.0);
 
         boolean happyHour = plugin.getHappyHourManager() != null && plugin.getHappyHourManager().isHappyHour();
-        double winChance = happyHour ? configManager.getWinRateHappyHour() : configManager.getWinRateNormal();
-        double jackpotChance = configManager.getJackpotRate();
+        double winChance = happyHour ? 50.0 : 30.0;
+        double jackpotChance = 5.0;
 
         if (streakCount >= 10) {
             winChance = Math.min(95.0, winChance * 2.0);
@@ -759,32 +761,30 @@ public class SoloSlotSession {
         String detailText = isWin ? formatSymbolNameStatic(winningSymbol) : "Thua";
 
         if (isWin) {
+            double multiplier = configManager.getSymbolMultiplier(winningSymbol);
+            double grossReward = currentBetAmount * multiplier;
+
             if (isJackpot) {
-                double jackpotAmount = jackpotManager.getJackpotPool();
-                if (jackpotAmount <= 0) {
-                    jackpotAmount = currentBetAmount * 5.0;
-                }
-
-                plugin.getEconomy().depositPlayer(player, jackpotAmount);
+                double jackpotPoolWon = jackpotManager.getJackpotPool();
+                grossReward += jackpotPoolWon;
                 jackpotManager.resetJackpotPool();
-                jackpotManager.broadcastJackpotWin(player.getName(), jackpotAmount);
+                jackpotManager.broadcastJackpotWin(player.getName(), grossReward);
+            }
 
+            double taxRate = configManager.getTaxRate(); // 0.10 (10%)
+            double taxAmount = grossReward * taxRate;
+            double netReward = grossReward - taxAmount;
+
+            plugin.getEconomy().depositPlayer(player, netReward);
+
+            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.4f);
+            if (isJackpot) {
                 spawnJackpotFireworksAndParticles(player);
-
-                lastResultText = "<gradient:#FF0000:#FFD700><bold>NỔ HŨ HỐT SẠCH HŨ +" + ConfigManager.formatMoney(jackpotAmount) + "$!</bold></gradient>";
-                player.sendMessage(mm.deserialize(
-                        "\n<gradient:#FF0000:#FFD700><bold>🔥🔥🔥 CHÚC MỪNG NỔ HŨ JACKPOT TRÚNG LỚN! 🔥🔥🔥</bold></gradient>\n" +
-                                "<green>Bạn đã quay trúng <gold><bold>3x KHỐI NETHERITE (NTR)</bold></gold> và RÚT SẠCH QUỸ HŨ TÍCH LŨY SERVER: <gold><bold>+" + ConfigManager.formatMoney(jackpotAmount) + "$</bold></gold>!</green>\n"
-                ));
+                lastResultText = "<gradient:#FF0000:#FFD700><bold>NỔ HŨ HỐT SẠCH HŨ +" + ConfigManager.formatMoney(netReward) + "$!</bold></gradient>";
+                player.sendMessage(configManager.getJackpotWinMsg(currentBetAmount, grossReward, taxAmount, netReward));
             } else {
-                double winReward = currentBetAmount * 2.0;
-                plugin.getEconomy().depositPlayer(player, winReward);
-
-                player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.4f);
-                lastResultText = "<green><bold>THẮNG X2 +" + ConfigManager.formatMoney(winReward) + "$ (" + detailText + ")</bold></green>";
-                player.sendMessage(mm.deserialize(
-                        "<gradient:gold:yellow><bold>🎉 THẮNG LỚN X2!</bold></gradient> <green>Bạn quay hàng ngang được 3x <gold>" + detailText + "</gold> và nhận thưởng: <gold><bold>+" + ConfigManager.formatMoney(winReward) + "$</bold></gold>!</green>"
-                ));
+                lastResultText = "<green><bold>THẮNG X2 +" + ConfigManager.formatMoney(netReward) + "$ (" + detailText + ")</bold></green>";
+                player.sendMessage(configManager.getWinMsg(detailText, multiplier, currentBetAmount, grossReward, taxAmount, netReward));
             }
 
             if (databaseManager != null) {
@@ -793,29 +793,24 @@ public class SoloSlotSession {
                         player.getName(),
                         currentBetAmount,
                         true,
-                        isJackpot ? jackpotManager.getJackpotPool() : currentBetAmount * 2.0,
-                        isJackpot ? "JACKPOT NỔ HŨ X5" : "THẮNG X2 " + detailText
+                        netReward,
+                        isJackpot ? "JACKPOT NỔ HŨ X5" : "THẮNG " + String.format("%.1fx", multiplier) + " " + detailText
                 );
             }
         } else {
-            // Khi chơi bằng Vé Quay: Thua KHÔNG bị trừ thêm tiền mặt và KHÔNG cộng tiền thua vào Quỹ Hũ
             if (!isUsingTicket) {
-                double jackpotContrib = currentBetAmount * 0.10;
-                jackpotManager.addJackpotPool(jackpotContrib);
+                // Thua bằng tiền mặt ($): NẠP 100% SỐ TIỀN THUA VÀO QUỸ JACKPOT SERVER!
+                jackpotManager.addLossToPool(currentBetAmount);
+                player.sendMessage(configManager.getLoseMsg(currentBetAmount));
+            } else {
+                // Thua bằng vé quay: 0$ tiền bị trừ, 0$ cộng hũ
+                player.sendMessage(mm.deserialize(
+                        "<gray>🎰 Lượt quay dùng <gold>Vé Quay</gold> không trúng thưởng hàng ngang. (Không bị trừ tiền xu $!)</gray>"
+                ));
             }
 
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.8f, 0.9f);
             lastResultText = isUsingTicket ? "<red>THUA (Vé Quay)</red>" : "<red>THUA (-" + ConfigManager.formatMoney(currentBetAmount) + "$)</red>";
-
-            if (isUsingTicket) {
-                player.sendMessage(mm.deserialize(
-                        "<gray>🎰 Lượt quay dùng <gold>Vé Quay</gold> không trúng thưởng hàng ngang. (Không bị trừ tiền xu $!)</gray>"
-                ));
-            } else {
-                player.sendMessage(mm.deserialize(
-                        "<gray>🎰 Rất tiếc! 3 khối khoáng sản chưa khớp hàng ngang. (+10% tiền cược đã được trích vào Quỹ Hũ Tích Lũy)</gray>"
-                ));
-            }
 
             if (databaseManager != null) {
                 databaseManager.recordSpinAsync(
@@ -824,7 +819,7 @@ public class SoloSlotSession {
                         currentBetAmount,
                         false,
                         0,
-                        isUsingTicket ? "THUA (Vé Quay)" : "THUA (Đã cộng vào Hũ)"
+                        isUsingTicket ? "THUA (Vé Quay)" : "THUA (Đã nạp 100% vào Hũ)"
                 );
             }
         }

@@ -140,8 +140,8 @@ public class MenuListener implements Listener {
 
                 switch (slot) {
                     case 40 -> new PersonalHistoryGui(plugin).open(player); // 📜 LỊCH SỬ CƯỢC CÁ NHÂN
-                    case 41 -> session.toggleAutoSpin();                     // ⚡ BẬT / TẮT QUAY TỰ ĐỘNG (AUTO)
-                    case 42 -> session.cyclePaymentMode();                   // 💳 CHỌN CHẾ ĐỘ THANH TOÁN (TIỀN VAULT / VÉ THƯỜNG / VÉ VIP)
+                    case 42 -> session.toggleAutoSpin();                     // ⚡ BẬT / TẮT QUAY TỰ ĐỘNG (AUTO)
+                    case 43 -> session.cyclePaymentMode();                   // 💳 CHỌN CHẾ ĐỘ THANH TOÁN (TIỀN VAULT / VÉ THƯỜNG / VÉ VIP)
                     case 45 -> session.setBetAmount(1000);
                     case 46 -> session.setBetAmount(10000);
                     case 47 -> session.setBetAmount(100000);
