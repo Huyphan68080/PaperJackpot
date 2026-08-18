@@ -25,8 +25,6 @@ import java.util.List;
  *   - /jackpot top (Xem Bảng Xếp Hạng Top 10 Thần Tài Casino)
  *   - /jackpot stats (Xem Thống Kê May Mắn Cá Nhân)
  *   - /jackpot time (Kiểm tra múi giờ Việt Nam & thời gian Giờ Vàng)
- *   - /jackpot sethologram (Đặt Hologram 3D Top 10 nổi trực tiếp trong game)
- *   - /jackpot removehologram (Xóa Hologram 3D Top 10 khỏi thế giới)
  *   - /jackpot testhappyhour (Phát thử thông báo & âm thanh Giờ Vàng)
  *   - /jackpot test (Kích hoạt 100% Nổ Hũ Jackpot lượt cược kế tiếp)
  *   - /jackpot setpool <số tiền> (Cài đặt Quỹ Jackpot Server)
@@ -83,35 +81,7 @@ public class JackpotCommand implements CommandExecutor {
                 return true;
             }
 
-            // 4. LỆNH ĐẶT HOLOGRAM 3D TOP 10 TRỰC TIẾP TRONG GAME: /jackpot sethologram HOẶC /jackpot setholo
-            if (subCmd.equals("sethologram") || subCmd.equals("setholo") || subCmd.equals("createholo")) {
-                if (!hasAdminPermission(sender)) {
-                    sender.sendMessage(configManager.getNoPermissionMsg());
-                    return true;
-                }
-                if (sender instanceof Player player) {
-                    if (plugin.getHologramManager() != null) {
-                        plugin.getHologramManager().createHologramWithPlugin(player);
-                    }
-                } else {
-                    sender.sendMessage(mm.deserialize("<red>Chỉ người chơi trong game mới đặt được Hologram!</red>"));
-                }
-                return true;
-            }
-
-            // 5. LỆNH XÓA HOLOGRAM 3D: /jackpot removehologram HOẶC /jackpot delholo HOẶC /jackpot rmholo
-            if (subCmd.equals("removehologram") || subCmd.equals("delholo") || subCmd.equals("rmholo")) {
-                if (!hasAdminPermission(sender)) {
-                    sender.sendMessage(configManager.getNoPermissionMsg());
-                    return true;
-                }
-                if (sender instanceof Player player && plugin.getHologramManager() != null) {
-                    plugin.getHologramManager().removeHologramWithPlugin(player);
-                }
-                return true;
-            }
-
-            // 6. LỆNH BẮN THỬ THÔNG BÁO GIỜ VÀNG: /jackpot testhappyhour HOẶC /jackpot testhh
+            // 4. LỆNH BẮN THỬ THÔNG BÁO GIỜ VÀNG: /jackpot testhappyhour HOẶC /jackpot testhh
             if (subCmd.equals("testhappyhour") || subCmd.equals("testhh") || subCmd.equals("triggerhappyhour")) {
                 if (!hasAdminPermission(sender)) {
                     sender.sendMessage(configManager.getNoPermissionMsg());
@@ -124,7 +94,7 @@ public class JackpotCommand implements CommandExecutor {
                 return true;
             }
 
-            // 7. LỆNH TEST NỔ HŨ: /jackpot test HOẶC /jackpot testjackpot HOẶC /jackpot testwin
+            // 5. LỆNH TEST NỔ HŨ: /jackpot test HOẶC /jackpot testjackpot HOẶC /jackpot testwin
             if (subCmd.equals("testjackpot") || subCmd.equals("test") || subCmd.equals("testwin")) {
                 if (!hasAdminPermission(sender)) {
                     sender.sendMessage(configManager.getNoPermissionMsg());
@@ -134,21 +104,18 @@ public class JackpotCommand implements CommandExecutor {
                 return true;
             }
 
-            // 8. RELOAD CONFIG: /jackpot reload HOẶC /jackpot rl
+            // 6. RELOAD CONFIG: /jackpot reload HOẶC /jackpot rl
             if (subCmd.equals("reload") || subCmd.equals("rl")) {
                 if (!hasAdminPermission(sender)) {
                     sender.sendMessage(configManager.getNoPermissionMsg());
                     return true;
                 }
                 configManager.loadConfig();
-                if (plugin.getHologramManager() != null) {
-                    plugin.getHologramManager().cleanOldNativeEntities();
-                }
                 sender.sendMessage(configManager.getReloadSuccessMsg());
                 return true;
             }
 
-            // 9. XEM LỊCH SỬ CSDL: /jackpot history HOẶC /jackpot log
+            // 7. XEM LỊCH SỬ CSDL: /jackpot history HOẶC /jackpot log
             if (subCmd.equals("history") || subCmd.equals("log")) {
                 if (!hasAdminPermission(sender)) {
                     sender.sendMessage(configManager.getNoPermissionMsg());
@@ -158,7 +125,7 @@ public class JackpotCommand implements CommandExecutor {
                 return true;
             }
 
-            // 10. LỆNH SET QUỸ JACKPOT TÍCH LŨY: /jackpot setpool <số tiền>
+            // 8. LỆNH SET QUỸ JACKPOT TÍCH LŨY: /jackpot setpool <số tiền>
             if (subCmd.equals("setpool") || subCmd.equals("sethuff")) {
                 if (!hasAdminPermission(sender)) {
                     sender.sendMessage(configManager.getNoPermissionMsg());
@@ -254,11 +221,9 @@ public class JackpotCommand implements CommandExecutor {
         sender.sendMessage(mm.deserialize(" <gold>/jackpot stats</gold> - Xem Bảng Thống Kê May Mắn Cá Nhân"));
         sender.sendMessage(mm.deserialize(" <gold>/jackpot time</gold> - Kiểm tra múi giờ Việt Nam UTC+7 & Giờ Vàng"));
         if (hasAdminPermission(sender)) {
-            sender.sendMessage(mm.deserialize(" <gold>/jackpot sethologram</gold> - Tạo Bảng Xếp Hạng Top 10 3D nổi mượt mà"));
-            sender.sendMessage(mm.deserialize(" <gold>/jackpot removehologram</gold> - Xóa Bảng Xếp Hạng Top 10 3D nổi"));
             sender.sendMessage(mm.deserialize(" <gold>/jackpot testhappyhour</gold> - Bắn thử thông báo & âm thanh Giờ Vàng"));
             sender.sendMessage(mm.deserialize(" <gold>/jackpot test</gold> - Kích hoạt 100% Nổ Hũ Hốt Sạch Hũ lượt quay tới"));
-            sender.sendMessage(mm.deserialize(" <gold>/jackpot setpool <tiền></gold> - Thao tác thiết lập Quỹ Hũ Tích LŨy"));
+            sender.sendMessage(mm.deserialize(" <gold>/jackpot setpool <tiền></gold> - Thao tác thiết lập Quỹ Hũ Tích Lũy"));
             sender.sendMessage(mm.deserialize(" <gold>/jackpot reload</gold> - Reload cấu hình"));
             sender.sendMessage(mm.deserialize(" <gold>/jackpot history</gold> - Xem lịch sử cược CSDL"));
         }
