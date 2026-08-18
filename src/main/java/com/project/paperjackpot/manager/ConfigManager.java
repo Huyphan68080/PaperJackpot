@@ -78,9 +78,9 @@ public class ConfigManager {
         taxRate = config.getDouble("settings.tax-rate", 0.10);
         normalWinMultiplier = config.getDouble("settings.normal-win-multiplier", 2.0);
         jackpotMultiplier = config.getDouble("settings.jackpot-multiplier", 5.0);
-        winRateNormal = config.getDouble("settings.win-rate-normal", 30.0);
-        winRateHappyHour = config.getDouble("settings.win-rate-happy-hour", 50.0);
-        jackpotRate = config.getDouble("settings.jackpot-rate", 5.0);
+        winRateNormal = config.getDouble("settings.win-rate-normal", 29.3);
+        winRateHappyHour = config.getDouble("settings.win-rate-happy-hour", 45.0);
+        jackpotRate = config.getDouble("settings.jackpot-rate", 0.50);
         guiTitle = config.getString("settings.gui-title", "<gradient:#8B0000:#D2143A><bold>🎰 CASINO NỔ HŨ</bold></gradient>");
 
         globalBossbar = config.getBoolean("settings.global-bossbar", true);

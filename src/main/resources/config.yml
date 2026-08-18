@@ -14,10 +14,10 @@ settings:
   normal-win-multiplier: 2.0
   jackpot-multiplier: 5.0
 
-  # Tỷ lệ thắng thường (%) và tỷ lệ Nổ Hũ Jackpot (%)
-  win-rate-normal: 30.0
-  win-rate-happy-hour: 50.0
-  jackpot-rate: 5.0
+  # Tỷ lệ thắng thường (29.3%) và tỷ lệ Nổ Hũ Jackpot (0.50%) cố định
+  win-rate-normal: 29.3
+  win-rate-happy-hour: 45.0
+  jackpot-rate: 0.50
 
   # Tiêu đề giao diện GUI Quay Hũ (Màu Đỏ Đô Đậm #8B0000 tương phản sắc nét trên nền xám GUI)
   gui-title: "<gradient:#8B0000:#D2143A><bold>🎰 CASINO NỔ HŨ</bold></gradient>"
