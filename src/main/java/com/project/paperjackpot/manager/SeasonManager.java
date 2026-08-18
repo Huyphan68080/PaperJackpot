@@ -7,6 +7,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 
 import java.util.List;
 
@@ -70,12 +71,39 @@ public class SeasonManager {
             int ticketCount = ticketRewards[i];
             int rank = i + 1;
 
-            OfflinePlayer target = Bukkit.getOfflinePlayer(entry.name());
-            if (economy != null && rewardAmount > 0) {
-                economy.depositPlayer(target, rewardAmount);
+            if (entry.uuid() != null) {
+                // 1. Cộng tiền Vault ($)
+                if (economy != null && rewardAmount > 0) {
+                    Player onlineTarget = Bukkit.getPlayer(entry.uuid());
+                    if (onlineTarget != null) {
+                        economy.depositPlayer(onlineTarget, rewardAmount);
+                    } else {
+                        OfflinePlayer offlineTarget = Bukkit.getOfflinePlayer(entry.uuid());
+                        economy.depositPlayer(offlineTarget, rewardAmount);
+                    }
+                }
+                // 2. Cộng Vé Quay vào CSDL
+                if (databaseManager != null && ticketCount > 0) {
+                    databaseManager.addTickets(entry.uuid(), ticketCount);
+                }
+            } else if (entry.name() != null) {
+                // Fallback tên người chơi
+                OfflinePlayer offlineTarget = Bukkit.getOfflinePlayer(entry.name());
+                if (economy != null && rewardAmount > 0) {
+                    economy.depositPlayer(offlineTarget, rewardAmount);
+                }
+                if (databaseManager != null && ticketCount > 0) {
+                    databaseManager.addTickets(offlineTarget.getUniqueId(), ticketCount);
+                }
             }
-            if (databaseManager != null && ticketCount > 0) {
-                databaseManager.addTickets(target.getUniqueId(), ticketCount);
+
+            // Gửi tin nhắn mừng & âm thanh chúc mừng trực tiếp cho người chơi nếu đang online
+            Player onlineP = entry.uuid() != null ? Bukkit.getPlayer(entry.uuid()) : (entry.name() != null ? Bukkit.getPlayer(entry.name()) : null);
+            if (onlineP != null) {
+                onlineP.sendMessage(mm.deserialize(
+                        "<gradient:#FFD700:#FFA500><bold>🎁 [THƯỞNG ĐUA TOP MÙA GIẢI TUẦN]</bold></gradient> <green>Chúc mừng bạn đoạt <gold><bold>Top " + rank + " Casino</bold></gold>! Đã nhận <gold><bold>+" + ConfigManager.formatMoney(rewardAmount) + "$</bold></gold> vào ví & <yellow><bold>+" + ticketCount + " Vé Quay 🎟️</bold></yellow>!</green>"
+                ));
+                onlineP.playSound(onlineP.getLocation(), org.bukkit.Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
             }
 
             String rankIcon = switch (rank) {

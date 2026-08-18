@@ -17,7 +17,7 @@ public class DatabaseManager {
     private final PaperJackpot plugin;
     private Connection connection;
 
-    public record TopWinnerEntry(String name, double totalPayout, int winCount) {}
+    public record TopWinnerEntry(UUID uuid, String name, double totalPayout, int winCount) {}
 
     public record PlayerStatsEntry(
             int totalSpins,
@@ -146,13 +146,21 @@ public class DatabaseManager {
 
     public List<TopWinnerEntry> getTopWinners(int limit) {
         List<TopWinnerEntry> topList = new ArrayList<>();
-        String sql = "SELECT player_name, SUM(payout) as total_won, COUNT(id) as win_count " +
+        String sql = "SELECT player_uuid, player_name, SUM(payout) as total_won, COUNT(id) as win_count " +
                 "FROM spin_history WHERE is_win = 1 GROUP BY player_uuid ORDER BY total_won DESC LIMIT ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, limit);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
+                String uuidStr = rs.getString("player_uuid");
+                UUID uuid = null;
+                if (uuidStr != null) {
+                    try {
+                        uuid = UUID.fromString(uuidStr);
+                    } catch (IllegalArgumentException ignored) {}
+                }
                 topList.add(new TopWinnerEntry(
+                        uuid,
                         rs.getString("player_name"),
                         rs.getDouble("total_won"),
                         rs.getInt("win_count")
