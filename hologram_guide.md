@@ -9,22 +9,22 @@ Plugin **PaperJackpot** hỗ trợ đầy đủ các **PlaceholderAPI** cho ngư
 Đứng tại vị trí muốn đặt Bảng Xếp Hạng Top 10 (ví dụ: Lobby / Spawn Casino) và mở khung Chat chạy lần lượt các lệnh sau:
 
 ```cmd
-/hologram create top_casino text
-/hologram edit top_casino setBillboard center
-/hologram edit top_casino setShadow true
-/hologram edit top_casino addLine &b&l✦ &f&lTOP ĐẠI GIA CASINO &b&l✦
-/hologram edit top_casino addLine &7&m━━━━━━━━━━━━━━━━━━━━
-/hologram edit top_casino addLine &e#1 &f%paperjackpot_top_1_name% &7» &a%paperjackpot_top_1_amount%
-/hologram edit top_casino addLine &e#2 &f%paperjackpot_top_2_name% &7» &a%paperjackpot_top_2_amount%
-/hologram edit top_casino addLine &e#3 &f%paperjackpot_top_3_name% &7» &a%paperjackpot_top_3_amount%
-/hologram edit top_casino addLine &e#4 &f%paperjackpot_top_4_name% &7» &a%paperjackpot_top_4_amount%
-/hologram edit top_casino addLine &e#5 &f%paperjackpot_top_5_name% &7» &a%paperjackpot_top_5_amount%
-/hologram edit top_casino addLine &e#6 &f%paperjackpot_top_6_name% &7» &a%paperjackpot_top_6_amount%
-/hologram edit top_casino addLine &e#7 &f%paperjackpot_top_7_name% &7» &a%paperjackpot_top_7_amount%
-/hologram edit top_casino addLine &e#8 &f%paperjackpot_top_8_name% &7» &a%paperjackpot_top_8_amount%
-/hologram edit top_casino addLine &e#9 &f%paperjackpot_top_9_name% &7» &a%paperjackpot_top_9_amount%
-/hologram edit top_casino addLine &e#10 &f%paperjackpot_top_10_name% &7» &a%paperjackpot_top_10_amount%
-/hologram edit top_casino addLine &7&m━━━━━━━━━━━━━━━━━━━━
+/hologram create text topcasino
+/hologram edit topcasino setBillboard center
+/hologram edit topcasino setShadow true
+/hologram edit topcasino addLine &b&l✦ &f&lTOP ĐẠI GIA CASINO &b&l✦
+/hologram edit topcasino addLine &7&m━━━━━━━━━━━━━━━━━━━━
+/hologram edit topcasino addLine &e#1 &f%paperjackpot_top_1_name% &7» &a%paperjackpot_top_1_amount%
+/hologram edit topcasino addLine &e#2 &f%paperjackpot_top_2_name% &7» &a%paperjackpot_top_2_amount%
+/hologram edit topcasino addLine &e#3 &f%paperjackpot_top_3_name% &7» &a%paperjackpot_top_3_amount%
+/hologram edit topcasino addLine &e#4 &f%paperjackpot_top_4_name% &7» &a%paperjackpot_top_4_amount%
+/hologram edit topcasino addLine &e#5 &f%paperjackpot_top_5_name% &7» &a%paperjackpot_top_5_amount%
+/hologram edit topcasino addLine &e#6 &f%paperjackpot_top_6_name% &7» &a%paperjackpot_top_6_amount%
+/hologram edit topcasino addLine &e#7 &f%paperjackpot_top_7_name% &7» &a%paperjackpot_top_7_amount%
+/hologram edit topcasino addLine &e#8 &f%paperjackpot_top_8_name% &7» &a%paperjackpot_top_8_amount%
+/hologram edit topcasino addLine &e#9 &f%paperjackpot_top_9_name% &7» &a%paperjackpot_top_9_amount%
+/hologram edit topcasino addLine &e#10 &f%paperjackpot_top_10_name% &7» &a%paperjackpot_top_10_amount%
+/hologram edit topcasino addLine &7&m━━━━━━━━━━━━━━━━━━━━
 ```
 
 ---
@@ -35,7 +35,7 @@ Bạn cũng có thể dán trực tiếp đoạn cấu hình dưới đây vào 
 
 ```yaml
 holograms:
-  top_casino:
+  topcasino:
     type: TEXT
     text:
       - '&b&l✦ &f&lTOP ĐẠI GIA CASINO &b&l✦'
