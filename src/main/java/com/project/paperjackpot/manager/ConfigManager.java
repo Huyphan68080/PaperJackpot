@@ -28,6 +28,9 @@ public class ConfigManager {
     private double taxRate;
     private double normalWinMultiplier;
     private double jackpotMultiplier;
+    private double winRateNormal;
+    private double winRateHappyHour;
+    private double jackpotRate;
     private String guiTitle;
 
     private boolean globalBossbar;
@@ -75,6 +78,9 @@ public class ConfigManager {
         taxRate = config.getDouble("settings.tax-rate", 0.10);
         normalWinMultiplier = config.getDouble("settings.normal-win-multiplier", 2.0);
         jackpotMultiplier = config.getDouble("settings.jackpot-multiplier", 5.0);
+        winRateNormal = config.getDouble("settings.win-rate-normal", 30.0);
+        winRateHappyHour = config.getDouble("settings.win-rate-happy-hour", 50.0);
+        jackpotRate = config.getDouble("settings.jackpot-rate", 5.0);
         guiTitle = config.getString("settings.gui-title", "<gradient:#8B0000:#D2143A><bold>🎰 CASINO NỔ HŨ</bold></gradient>");
 
         globalBossbar = config.getBoolean("settings.global-bossbar", true);
@@ -149,9 +155,9 @@ public class ConfigManager {
     public double getTaxRate() { return taxRate; }
     public double getNormalWinMultiplier() { return normalWinMultiplier; }
     public double getJackpotMultiplier() { return jackpotMultiplier; }
-    public double getWinRateNormal() { return 35.0; }
-    public double getWinRateHappyHour() { return 60.0; }
-    public double getJackpotRate() { return 5.0; }
+    public double getWinRateNormal() { return winRateNormal; }
+    public double getWinRateHappyHour() { return winRateHappyHour; }
+    public double getJackpotRate() { return jackpotRate; }
     public String getGuiTitle() { return guiTitle; }
 
     public boolean isGlobalBossbarEnabled() { return globalBossbar; }

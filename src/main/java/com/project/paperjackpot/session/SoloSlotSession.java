@@ -646,8 +646,8 @@ public class SoloSlotSession {
         double roll = rand.nextDouble(100.0);
 
         boolean happyHour = plugin.getHappyHourManager() != null && plugin.getHappyHourManager().isHappyHour();
-        double winChance = happyHour ? 50.0 : 30.0;
-        double jackpotChance = 5.0;
+        double winChance = happyHour ? configManager.getWinRateHappyHour() : configManager.getWinRateNormal();
+        double jackpotChance = configManager.getJackpotRate();
 
         if (streakCount >= 10) {
             winChance = Math.min(95.0, winChance * 2.0);
@@ -669,6 +669,8 @@ public class SoloSlotSession {
         }
 
         Material finalMiddleSymbol;
+        Material[] finalReelMiddle = new Material[3];
+
         if (willWin) {
             if (isJackpotWin) {
                 finalMiddleSymbol = Material.NETHERITE_BLOCK;
@@ -679,8 +681,17 @@ public class SoloSlotSession {
                 };
                 finalMiddleSymbol = normalSymbols[rand.nextInt(normalSymbols.length)];
             }
+            finalReelMiddle[0] = finalMiddleSymbol;
+            finalReelMiddle[1] = finalMiddleSymbol;
+            finalReelMiddle[2] = finalMiddleSymbol;
         } else {
-            finalMiddleSymbol = SYMBOLS[rand.nextInt(SYMBOLS.length)];
+            // Lượt THUA: 3 ô hàng ngang trung tâm (Slots 21, 22, 23) ĐẢM BẢO KHÔNG THỂ KHỚP CẢ 3 Ô!
+            finalMiddleSymbol = Material.COAL_BLOCK;
+            finalReelMiddle[0] = SYMBOLS[rand.nextInt(SYMBOLS.length)];
+            finalReelMiddle[1] = SYMBOLS[rand.nextInt(SYMBOLS.length)];
+            do {
+                finalReelMiddle[2] = SYMBOLS[rand.nextInt(SYMBOLS.length)];
+            } while (finalReelMiddle[2] == finalReelMiddle[1] && finalReelMiddle[1] == finalReelMiddle[0]);
         }
 
         int[] reel1 = {12, 21, 30};
@@ -701,21 +712,21 @@ public class SoloSlotSession {
                 if (ticks < 10) {
                     shiftReelDown(reel1, rand);
                 } else if (ticks == 10) {
-                    setReelFinal(reel1, finalMiddleSymbol, finalWin, rand);
+                    setReelFinal(reel1, finalReelMiddle[0], rand);
                     player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.2f);
                 }
 
                 if (ticks < 14) {
                     shiftReelDown(reel2, rand);
                 } else if (ticks == 14) {
-                    setReelFinal(reel2, finalMiddleSymbol, finalWin, rand);
+                    setReelFinal(reel2, finalReelMiddle[1], rand);
                     player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.4f);
                 }
 
                 if (ticks < 18) {
                     shiftReelDown(reel3, rand);
                 } else if (ticks == 18) {
-                    setReelFinal(reel3, finalMiddleSymbol, finalWin, rand);
+                    setReelFinal(reel3, finalReelMiddle[2], rand);
                     player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.6f);
                 }
 
@@ -736,25 +747,10 @@ public class SoloSlotSession {
         player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.3f, 1.8f);
     }
 
-    private void setReelFinal(int[] reelSlots, Material middleSymbol, boolean willWin, ThreadLocalRandom rand) {
+    private void setReelFinal(int[] reelSlots, Material middleSymbol, ThreadLocalRandom rand) {
         gui.setItem(reelSlots[1], buildSymbolItemStatic(middleSymbol, mm));
-
-        if (!willWin) {
-            Material topMat;
-            do {
-                topMat = SYMBOLS[rand.nextInt(SYMBOLS.length)];
-            } while (topMat == middleSymbol);
-            gui.setItem(reelSlots[0], buildSymbolItemStatic(topMat, mm));
-
-            Material botMat;
-            do {
-                botMat = SYMBOLS[rand.nextInt(SYMBOLS.length)];
-            } while (botMat == middleSymbol);
-            gui.setItem(reelSlots[2], buildSymbolItemStatic(botMat, mm));
-        } else {
-            gui.setItem(reelSlots[0], buildSymbolItemStatic(SYMBOLS[rand.nextInt(SYMBOLS.length)], mm));
-            gui.setItem(reelSlots[2], buildSymbolItemStatic(SYMBOLS[rand.nextInt(SYMBOLS.length)], mm));
-        }
+        gui.setItem(reelSlots[0], buildSymbolItemStatic(SYMBOLS[rand.nextInt(SYMBOLS.length)], mm));
+        gui.setItem(reelSlots[2], buildSymbolItemStatic(SYMBOLS[rand.nextInt(SYMBOLS.length)], mm));
     }
 
     private void handleSpinResult(boolean isWin, boolean isJackpot, Material winningSymbol) {
