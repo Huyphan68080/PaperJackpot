@@ -1,17 +1,33 @@
-# ✦ HƯỚNG DẪN CẤU HÌNH BẢNG XẾP HẠNG HOLOGRAM 3D TOP 10 ✦
+# ✦ HƯỚNG DẪN TẠO HOLOGRAM 3D TOP 10 BẰNG FANCYHOLOGRAMS ✦
 
-Plugin **PaperJackpot** hỗ trợ đầy đủ các **PlaceholderAPI** cho người chơi đứng Top 1 đến Top 10 để bạn tự do tạo Bảng Hologram 3D mượt mà bằng **FancyHolograms** (hoặc **DecentHolograms**).
+Plugin **PaperJackpot** hỗ trợ đầy đủ các **PlaceholderAPI** cho người chơi đứng Top 1 đến Top 10 để bạn tạo Bảng Hologram 3D mượt mà bằng **FancyHolograms** (hoặc **DecentHolograms**).
 
 ---
 
-## ⚡ CÁC LỆNH CHẠY TRONG GAME TẠO BẢNG FANCYHOLOGRAMS CHUẨN ĐẸP
+## ⚠️ NGUYÊN NHÂN HOLOGRAM KHÔNG TỰ CẬP NHẬT REAL-TIME & CÁCH SỬA
 
-Đứng tại vị trí muốn đặt Bảng Xếp Hạng Top 10 (ví dụ: Lobby / Spawn Casino) và mở khung Chat chạy lần lượt các lệnh sau:
+Khi vừa tạo Hologram bằng FancyHolograms, mặc định FancyHolograms đặt **thời gian tự động cập nhật Placeholder là `-1` (Tắt tự động cập nhật)**. Đó là lý do tại sao Bảng Hologram bị đứng nguyên ở chữ `---` mà không đổi sang tên đại gia khi có người thắng cược!
+
+### 🔧 Cách Bật Cập Nhật Real-Time 100%:
+
+Mở ô Chat trong game và chạy lệnh sau để bật làm mới real-time cho FancyHolograms:
+
+```cmd
+/hologram edit topcasino setUpdateTextInterval 5
+```
+*(Hoặc `setUpdateTextInterval 20` để làm mới mỗi 1 giây)*
+
+---
+
+## ⚡ CÁC LỆNH TẠO BẢNG FANCYHOLOGRAMS HOÀN CHỈNH IN-GAME
+
+Đứng tại vị trí muốn đặt Bảng Xếp Hạng Top 10 và mở khung Chat chạy lần lượt các lệnh sau:
 
 ```cmd
 /hologram create text topcasino
 /hologram edit topcasino setBillboard center
 /hologram edit topcasino setShadow true
+/hologram edit topcasino setUpdateTextInterval 5
 /hologram edit topcasino addLine &b&l✦ &f&lTOP ĐẠI GIA CASINO &b&l✦
 /hologram edit topcasino addLine &7&m━━━━━━━━━━━━━━━━━━━━
 /hologram edit topcasino addLine &e#1 &f%paperjackpot_top_1_name% &7» &a%paperjackpot_top_1_amount%
@@ -37,6 +53,7 @@ Bạn cũng có thể dán trực tiếp đoạn cấu hình dưới đây vào 
 holograms:
   topcasino:
     type: TEXT
+    update_text_interval: 5
     text:
       - '&b&l✦ &f&lTOP ĐẠI GIA CASINO &b&l✦'
       - '&7&m━━━━━━━━━━━━━━━━━━━━'

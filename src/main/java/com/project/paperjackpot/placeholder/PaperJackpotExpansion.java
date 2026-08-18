@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * PaperJackpotExpansion - Tích hợp PlaceholderAPI cho PaperJackpot & FancyHolograms / DecentHolograms.
@@ -18,12 +20,12 @@ import java.util.List;
  *   %paperjackpot_my_total_wins%
  *   %paperjackpot_top_1_name% ... %paperjackpot_top_10_name%
  *   %paperjackpot_top_1_amount% ... %paperjackpot_top_10_amount%
- *   %paperjackpot_top_line_1% ... %paperjackpot_top_line_10% (MiniMessage cho FancyHolograms)
- *   %paperjackpot_top_line_legacy_1% ... %paperjackpot_top_line_legacy_10% (Legacy & codes cho DecentHolograms)
+ *   %paperjackpot_top_line_1% ... %paperjackpot_top_line_10%
  */
 public class PaperJackpotExpansion extends PlaceholderExpansion {
 
     private final PaperJackpot plugin;
+    private static final Pattern TOP_PATTERN = Pattern.compile("^top_?(\\d+)(?:_(name|amount|value|val|raw|amount_raw))?$");
 
     public PaperJackpotExpansion(PaperJackpot plugin) {
         this.plugin = plugin;
@@ -93,19 +95,18 @@ public class PaperJackpotExpansion extends PlaceholderExpansion {
             } catch (Exception ignored) {}
         }
 
-        // Xử lý Placeholder Top 1 đến Top 10 riêng lẻ (%paperjackpot_top_1_name%, %paperjackpot_top1_name%, v.v.)
-        if (lower.startsWith("top_") || lower.startsWith("top")) {
-            String clean = lower.replace("top_", "").replace("top", "");
+        // Xử lý Regex chuẩn cho các biến Top (%paperjackpot_top_1_name%, %paperjackpot_top_1_amount%, %paperjackpot_top1_name%, v.v.)
+        Matcher matcher = TOP_PATTERN.matcher(lower);
+        if (matcher.find()) {
             try {
-                String[] parts = clean.split("_");
-                int rank = Integer.parseInt(parts[0]);
-                String type = parts.length > 1 ? parts[1] : "name";
+                int rank = Integer.parseInt(matcher.group(1));
+                String type = matcher.group(2) != null ? matcher.group(2) : "name";
 
                 if (rank >= 1 && rank <= 10) {
                     List<DatabaseManager.TopWinnerEntry> topList = plugin.getDatabaseManager().getTopWinners(10);
                     if (rank <= topList.size()) {
                         DatabaseManager.TopWinnerEntry entry = topList.get(rank - 1);
-                        if (type.equals("amount")) {
+                        if (type.equals("amount") || type.equals("value") || type.equals("val")) {
                             return ConfigManager.formatMoney(entry.totalPayout()) + "$";
                         } else if (type.equals("raw") || type.equals("amount_raw")) {
                             return String.valueOf(entry.totalPayout());
@@ -113,7 +114,7 @@ public class PaperJackpotExpansion extends PlaceholderExpansion {
                             return entry.name();
                         }
                     } else {
-                        return type.contains("amount") ? "---" : "---";
+                        return "---";
                     }
                 }
             } catch (Exception ignored) {}
