@@ -149,6 +149,9 @@ public class ConfigManager {
     public double getTaxRate() { return taxRate; }
     public double getNormalWinMultiplier() { return normalWinMultiplier; }
     public double getJackpotMultiplier() { return jackpotMultiplier; }
+    public double getWinRateNormal() { return 35.0; }
+    public double getWinRateHappyHour() { return 60.0; }
+    public double getJackpotRate() { return 5.0; }
     public String getGuiTitle() { return guiTitle; }
 
     public boolean isGlobalBossbarEnabled() { return globalBossbar; }

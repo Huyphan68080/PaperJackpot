@@ -87,6 +87,30 @@ public class JackpotManager {
         updateGlobalBossBar();
     }
 
+    public synchronized void addJackpotPool(double amount) {
+        this.currentPool += amount;
+        if (databaseManager != null) {
+            databaseManager.saveJackpotPoolAsync(this.currentPool);
+        }
+        updateGlobalBossBar();
+    }
+
+    public synchronized double resetJackpotPool() {
+        double won = this.currentPool;
+        this.currentPool = 0.0;
+        if (databaseManager != null) {
+            databaseManager.saveJackpotPoolAsync(this.currentPool);
+        }
+        updateGlobalBossBar();
+        return won;
+    }
+
+    public void broadcastJackpotWin(String winnerName, double amount) {
+        this.lastWinnerName = winnerName;
+        String msg = "<gradient:#FF0000:#FFD700><bold>🎉 CHÚC MỪNG PHÁT LỘC! " + winnerName + " VỪA TRÚNG NỔ HŨ " + ConfigManager.formatMoney(amount) + "$! 🎉</bold></gradient>";
+        Bukkit.broadcast(configManager.getMiniMessage().deserialize(msg));
+    }
+
     public void updateGlobalBossBar() {
         if (!configManager.isGlobalBossbarEnabled()) return;
         globalBossBar.name(configManager.getMiniMessage().deserialize("<gradient:#FF0000:#FFD700><bold>🔥 QUỸ JACKPOT TÍCH LŨY SERVER: " + ConfigManager.formatMoney(currentPool) + "$ 🔥</bold></gradient>"));

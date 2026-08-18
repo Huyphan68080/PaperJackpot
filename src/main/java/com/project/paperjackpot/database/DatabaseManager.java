@@ -158,6 +158,11 @@ public class DatabaseManager {
         });
     }
 
+    public void recordSpinAsync(UUID playerUuid, String playerName,
+                                double betAmount, boolean isWin, double payout, String result) {
+        recordSpinAsync(1, playerUuid, playerName, betAmount, isWin, payout, result);
+    }
+
     public List<TopWinnerEntry> getTopWinners(int limit) {
         List<TopWinnerEntry> topList = new ArrayList<>();
         String sql = "SELECT player_uuid, player_name, SUM(payout) as total_won, COUNT(id) as win_count " +
@@ -228,6 +233,14 @@ public class DatabaseManager {
             plugin.getLogger().warning("[Database] Lỗi tính thống kê người chơi: " + e.getMessage());
         }
         return new PlayerStatsEntry(0, 0, 0, 0, 0, 0, 0);
+    }
+
+    public int getWins(UUID playerUuid) {
+        return getPlayerStats(playerUuid).totalWins();
+    }
+
+    public int getTotalSpins(UUID playerUuid) {
+        return getPlayerStats(playerUuid).totalSpins();
     }
 
     public long getLastFreeSpinTime(UUID playerUuid) {

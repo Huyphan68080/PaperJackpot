@@ -90,6 +90,10 @@ public class HappyHourManager {
         plugin.getLogger().info("⏰ [HappyHour] Đã phát thông báo KẾT THÚC Giờ Vàng Casino.");
     }
 
+    public boolean isHappyHour() {
+        return configManager.isHappyHourActive();
+    }
+
     public void stop() {
         if (checkTask != null) {
             checkTask.cancel();
