@@ -79,6 +79,11 @@ public class PaperJackpotExpansion extends PlaceholderExpansion {
             return String.valueOf(plugin.getDatabaseManager().getTickets(player.getUniqueId()));
         }
 
+        if (lower.equals("vip_tickets") || lower.equals("my_vip_tickets")) {
+            if (player == null) return "0";
+            return String.valueOf(plugin.getDatabaseManager().getVipTickets(player.getUniqueId()));
+        }
+
         if (lower.equals("top_header")) {
             return "<gradient:#FFD700:#FFA500><bold>✦ TOP ĐẠI GIA CASINO NỔ HŨ ✦</bold></gradient>";
         }

@@ -1,12 +1,16 @@
 package com.project.paperjackpot.listener;
 
 import com.project.paperjackpot.PaperJackpot;
+import com.project.paperjackpot.database.DatabaseManager;
 import com.project.paperjackpot.game.GameMode;
 import com.project.paperjackpot.gui.LeaderboardGui;
 import com.project.paperjackpot.gui.PersonalHistoryGui;
 import com.project.paperjackpot.gui.PlayerStatsGui;
+import com.project.paperjackpot.manager.ConfigManager;
 import com.project.paperjackpot.session.SoloSlotSession;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -14,10 +18,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.ItemStack;
 
 /**
- * MenuListener - Lắng nghe tương tác Click GUI Casino, Leaderboard, Thống Kê, Lịch Sử & Auto Spin.
+ * MenuListener - Lắng nghe tương tác Click GUI Casino, Leaderboard, Thống Kê, Lịch Sử & Nạp Vé Quay.
  */
 public class MenuListener implements Listener {
 
@@ -35,34 +41,43 @@ public class MenuListener implements Listener {
     }
 
     @EventHandler
-    public void onPlayerInteract(org.bukkit.event.player.PlayerInteractEvent event) {
+    public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.getAction() != org.bukkit.event.block.Action.RIGHT_CLICK_AIR && event.getAction() != org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK) {
             return;
         }
 
         Player player = event.getPlayer();
-        org.bukkit.inventory.ItemStack item = event.getItem();
+        ItemStack item = event.getItem();
+        if (item == null || item.getType() == Material.AIR) return;
 
-        if (plugin.getConfigManager().isTicketItem(item)) {
+        ConfigManager cfg = plugin.getConfigManager();
+        DatabaseManager db = plugin.getDatabaseManager();
+        if (cfg == null || db == null) return;
+
+        if (cfg.isVipTicketItem(item)) {
             event.setCancelled(true);
-            if (item != null) {
-                if (item.getAmount() > 1) {
-                    item.setAmount(item.getAmount() - 1);
-                } else {
-                    if (event.getHand() != null) {
-                        player.getInventory().setItem(event.getHand(), null);
-                    }
-                }
-            }
+            int amount = item.getAmount();
+            item.setAmount(0);
 
-            plugin.getDatabaseManager().addTickets(player.getUniqueId(), 1);
-            int newBalance = plugin.getDatabaseManager().getTickets(player.getUniqueId());
+            db.addVipTickets(player.getUniqueId(), amount);
+            int newTotal = db.getVipTickets(player.getUniqueId());
 
-            net.kyori.adventure.text.minimessage.MiniMessage mm = plugin.getConfigManager().getMiniMessage();
-            player.sendMessage(mm.deserialize(
-                    "<gradient:#FFD700:#FFA500><bold>🎟️ [VÉ CASINO JACKPOT]</bold></gradient> <green>Đã nạp 1x Vé Quay vào ví tài khoản của bạn! (Tổng cộng: <gold><bold>" + newBalance + " vé</bold></gold>)</green>"
+            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.5f);
+            player.sendMessage(cfg.getMiniMessage().deserialize(
+                    "<gradient:#FF0000:#FFD700><bold>🎫 [VÉ VIP HIGHROLLER 500K$]</bold></gradient> <green>Đã nạp thành công <gold><bold>+" + amount + "x Vé VIP (500k$)</bold></gold> vào tài khoản! (Tổng số dư: <gold><bold>" + newTotal + " vé VIP</bold></gold>)</green>"
             ));
-            player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.6f);
+        } else if (cfg.isTicketItem(item)) {
+            event.setCancelled(true);
+            int amount = item.getAmount();
+            item.setAmount(0);
+
+            db.addTickets(player.getUniqueId(), amount);
+            int newTotal = db.getTickets(player.getUniqueId());
+
+            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.2f);
+            player.sendMessage(cfg.getMiniMessage().deserialize(
+                    "<gradient:#FFD700:#FFA500><bold>🎟️ [VÉ QUAY CASINO]</bold></gradient> <green>Đã nạp thành công <gold><bold>+" + amount + "x Vé Quay Thường (1k-100k)</bold></gold> vào tài khoản! (Tổng số dư: <gold><bold>" + newTotal + " vé</bold></gold>)</green>"
+            ));
         }
     }
 

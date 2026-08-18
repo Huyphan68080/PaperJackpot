@@ -192,11 +192,67 @@ public class JackpotCommand implements CommandExecutor {
                 return true;
             }
 
+            // 9b. LỆNH TRAO VÉ VIP ẢO CSDL: /jackpot givevipticket <player> <số lượng>
+            if (subCmd.equals("givevipticket") || subCmd.equals("addvipticket")) {
+                if (!hasAdminPermission(sender)) {
+                    sender.sendMessage(configManager.getNoPermissionMsg());
+                    return true;
+                }
+                if (args.length > 2) {
+                    Player target = org.bukkit.Bukkit.getPlayer(args[1]);
+                    if (target == null) {
+                        sender.sendMessage(mm.deserialize("<red>Người chơi không online hoặc không tồn tại!</red>"));
+                        return true;
+                    }
+                    try {
+                        int amount = Integer.parseInt(args[2]);
+                        databaseManager.addVipTickets(target.getUniqueId(), amount);
+                        sender.sendMessage(mm.deserialize("<green>✅ Đã cấp <gold><bold>" + amount + " Vé VIP Highroller (500k$)</bold></gold> vào ví CSDL của người chơi <yellow>" + target.getName() + "</yellow>!</green>"));
+                        target.sendMessage(mm.deserialize("<gradient:#FF0000:#FFD700><bold>🎫 [VÉ VIP HIGHROLLER 500K$]</bold></gradient> <green>Bạn vừa được Admin thưởng <gold><bold>" + amount + " Vé VIP Highroller (500k$)</bold></gold>!</green>"));
+                    } catch (NumberFormatException e) {
+                        sender.sendMessage(mm.deserialize("<red>Số lượng không hợp lệ!</red>"));
+                    }
+                } else {
+                    sender.sendMessage(mm.deserialize("<red>Cú pháp: /jackpot givevipticket <người_chơi> <số_lượng></red>"));
+                }
+                return true;
+            }
+
+            // 9c. LỆNH TRAO VAT PHAM VE VIP ITEM KHO DO: /jackpot giveitemvipticket <player> <số lượng>
+            if (subCmd.equals("giveitemvipticket") || subCmd.equals("givevipticketitem") || subCmd.equals("givevipitem")) {
+                if (!hasAdminPermission(sender)) {
+                    sender.sendMessage(configManager.getNoPermissionMsg());
+                    return true;
+                }
+                if (args.length > 2) {
+                    Player target = org.bukkit.Bukkit.getPlayer(args[1]);
+                    if (target == null) {
+                        sender.sendMessage(mm.deserialize("<red>Người chơi không online hoặc không tồn tại!</red>"));
+                        return true;
+                    }
+                    try {
+                        int amount = Integer.parseInt(args[2]);
+                        org.bukkit.inventory.ItemStack vipStack = configManager.createVipTicketItem(amount);
+                        target.getInventory().addItem(vipStack);
+                        sender.sendMessage(mm.deserialize("<green>✅ Đã trao <gold><bold>" + amount + "x Vé VIP Highroller Item (CMD 888)</bold></gold> vào kho đồ người chơi <yellow>" + target.getName() + "</yellow>!</green>"));
+                        target.sendMessage(mm.deserialize("<gradient:#FF0000:#FFD700><bold>🎫 [VÉ VIP HIGHROLLER ITEM]</bold></gradient> <green>Bạn vừa nhận được <gold><bold>" + amount + "x Vé VIP Highroller (500k$)</bold></gold> trong kho đồ! Cầm trên tay nhấp chuột phải để nạp vào tài khoản.</green>"));
+                    } catch (NumberFormatException e) {
+                        sender.sendMessage(mm.deserialize("<red>Số lượng không hợp lệ!</red>"));
+                    }
+                } else {
+                    sender.sendMessage(mm.deserialize("<red>Cú pháp: /jackpot giveitemvipticket <người_chơi> <số_lượng></red>"));
+                }
+                return true;
+            }
+
             // 10. LỆNH KIỂM TRA VÉ VÍ CÁ NHÂN: /jackpot tickets
             if (subCmd.equals("tickets") || subCmd.equals("ve")) {
                 if (sender instanceof Player player) {
                     int count = databaseManager.getTickets(player.getUniqueId());
-                    player.sendMessage(mm.deserialize("<gradient:#FFD700:#FFA500><bold>🎟️ [VÍ VÉ QUAY CASINO]</bold></gradient> <green>Số dư vé quay của bạn hiện tại: <gold><bold>" + count + " vé</bold></gold>.</green>"));
+                    int vipCount = databaseManager.getVipTickets(player.getUniqueId());
+                    player.sendMessage(mm.deserialize("<gradient:#FFD700:#FFA500><bold>🎟️ [VÍ VÉ QUAY CASINO]</bold></gradient>\n" +
+                            "<yellow>• Vé Quay Thường (1k-100k): <gold><bold>" + count + " vé</bold></gold>\n" +
+                            "<gold>• Vé VIP Highroller (500k$): <yellow><bold>" + vipCount + " vé VIP</bold></yellow>"));
                 } else {
                     sender.sendMessage(mm.deserialize("<red>Chỉ người chơi trong game mới dùng được lệnh này!</red>"));
                 }

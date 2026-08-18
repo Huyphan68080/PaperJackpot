@@ -82,13 +82,18 @@ public class DatabaseManager {
                                 ")"
                 );
 
-                // Bảng lưu vé quay cá nhân
+                // Bảng lưu vé quay cá nhân (Vé Thường & Vé VIP Highroller 500k$)
                 stmt.executeUpdate(
                         "CREATE TABLE IF NOT EXISTS player_tickets (" +
                                 "player_uuid TEXT PRIMARY KEY, " +
-                                "tickets INTEGER NOT NULL DEFAULT 0" +
+                                "tickets INTEGER NOT NULL DEFAULT 0, " +
+                                "vip_tickets INTEGER NOT NULL DEFAULT 0" +
                                 ")"
                 );
+
+                try {
+                    stmt.executeUpdate("ALTER TABLE player_tickets ADD COLUMN vip_tickets INTEGER NOT NULL DEFAULT 0");
+                } catch (SQLException ignored) {} // Cột đã tồn tại
             }
 
             plugin.getLogger().info("[Database] CSDL SQLite đã khởi tạo thành công!");
@@ -330,6 +335,47 @@ public class DatabaseManager {
             return true;
         } catch (SQLException e) {
             plugin.getLogger().warning("[Database] Lỗi trừ vé quay: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public int getVipTickets(UUID uuid) {
+        try (PreparedStatement ps = connection.prepareStatement("SELECT vip_tickets FROM player_tickets WHERE player_uuid = ?")) {
+            ps.setString(1, uuid.toString());
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("vip_tickets");
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().warning("[Database] Lỗi đọc vé VIP: " + e.getMessage());
+        }
+        return 0;
+    }
+
+    public void addVipTickets(UUID uuid, int count) {
+        String sql = "INSERT INTO player_tickets (player_uuid, vip_tickets) VALUES (?, ?) " +
+                "ON CONFLICT(player_uuid) DO UPDATE SET vip_tickets = vip_tickets + ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            ps.setInt(2, count);
+            ps.setInt(3, count);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            plugin.getLogger().warning("[Database] Lỗi thêm vé VIP: " + e.getMessage());
+        }
+    }
+
+    public boolean removeVipTickets(UUID uuid, int count) {
+        int current = getVipTickets(uuid);
+        if (current < count) return false;
+        String sql = "UPDATE player_tickets SET vip_tickets = vip_tickets - ? WHERE player_uuid = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, count);
+            ps.setString(2, uuid.toString());
+            ps.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            plugin.getLogger().warning("[Database] Lỗi trừ vé VIP: " + e.getMessage());
             return false;
         }
     }

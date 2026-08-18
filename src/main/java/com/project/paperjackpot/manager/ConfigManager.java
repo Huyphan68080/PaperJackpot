@@ -223,10 +223,10 @@ public class ConfigManager {
         ItemStack item = new ItemStack(Material.PAPER, amount);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(mm.deserialize("<gradient:#FFD700:#FFA500><bold>🎟️ VÉ QUAY CASINO JACKPOT</bold></gradient>"));
+            meta.displayName(mm.deserialize("<gradient:#FFD700:#FFA500><bold>🎟️ VÉ QUAY CASINO (1K$ - 100K$)</bold></gradient>"));
             meta.lore(java.util.List.of(
-                    mm.deserialize("<yellow>Vé Quay Nổ Hũ Cao Cấp Server Casino</yellow>"),
-                    mm.deserialize("<gray>Sử dụng vé này để quay 1 lượt cược miễn phí!</gray>"),
+                    mm.deserialize("<yellow>Vé Quay Nổ Hũ Hạng Thường Server Casino</yellow>"),
+                    mm.deserialize("<gray>Áp dụng quay miễn phí cho các mức cược 1k$, 10k$, 100k$!</gray>"),
                     mm.deserialize("<gray>👉 Nhấp chuột phải khi cầm trên tay để nạp vào ví vé.</gray>")
             ));
             meta.setCustomModelData(777);
@@ -246,6 +246,35 @@ public class ConfigManager {
         if (meta == null) return false;
         org.bukkit.NamespacedKey key = new org.bukkit.NamespacedKey(plugin, "jackpot_ticket");
         return "JACKPOT_TICKET_V1".equals(meta.getPersistentDataContainer().get(key, org.bukkit.persistence.PersistentDataType.STRING));
+    }
+
+    public ItemStack createVipTicketItem(int amount) {
+        ItemStack item = new ItemStack(Material.PAPER, amount);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.displayName(mm.deserialize("<gradient:#FF0000:#FFD700><bold>🎫 VÉ QUAY VIP HIGHROLLER (500K$)</bold></gradient>"));
+            meta.lore(java.util.List.of(
+                    mm.deserialize("<gold><bold>Vé Quay VIP Thần Tài Siêu Độc Quyền</bold></gold>"),
+                    mm.deserialize("<gray>Đặc quyền quay miễn phí mức cược Tối Đa 500,000$!</gray>"),
+                    mm.deserialize("<gray>👉 Nhấp chuột phải khi cầm trên tay để nạp vào ví vé VIP.</gray>")
+            ));
+            meta.setCustomModelData(888);
+            meta.addEnchant(org.bukkit.enchantments.Enchantment.UNBREAKING, 1, true);
+            meta.addItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
+
+            org.bukkit.NamespacedKey key = new org.bukkit.NamespacedKey(plugin, "jackpot_ticket");
+            meta.getPersistentDataContainer().set(key, org.bukkit.persistence.PersistentDataType.STRING, "JACKPOT_TICKET_VIP");
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    public boolean isVipTicketItem(ItemStack item) {
+        if (item == null || item.getType() == Material.AIR || !item.hasItemMeta()) return false;
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return false;
+        org.bukkit.NamespacedKey key = new org.bukkit.NamespacedKey(plugin, "jackpot_ticket");
+        return "JACKPOT_TICKET_VIP".equals(meta.getPersistentDataContainer().get(key, org.bukkit.persistence.PersistentDataType.STRING));
     }
 
     public static String formatMoney(double amount) {

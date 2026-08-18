@@ -134,13 +134,16 @@ public class SoloSlotSession {
             gui.setItem(s, buildSymbolItemStatic(randomMat, mm));
         }
 
+        // Slot 41: 🎫 VÍ VÉ VIP HIGHROLLER (500K$)
+        updateVipTicketItem();
+
         // Slot 42: 📜 LỊCH SỬ CƯỢC CÁ NHÂN
         updateHistoryButtonItem();
 
         // Slot 43: ⚡ AUTO SPIN (TỰ ĐỘNG QUAY RẢNH TAY)
         updateAutoSpinItem();
 
-        // Slot 44: 🎟️ VÍ VÉ QUAY CASINO
+        // Slot 44: 🎟️ VÍ VÉ THƯỜNG (1K - 100K)
         updateTicketItem();
 
         // các nút chọn tiền cược (Slots 45-48)
@@ -370,19 +373,39 @@ public class SoloSlotSession {
         ItemStack ticketItem = configManager.createTicketItem(1);
         ItemMeta meta = ticketItem.getItemMeta();
         if (meta != null) {
-            meta.displayName(mm.deserialize("<gradient:#FFD700:#FFA500><bold>🎟️ VÍ VÉ QUAY: " + count + " VÉ</bold></gradient>"));
+            meta.displayName(mm.deserialize("<gradient:#FFD700:#FFA500><bold>🎟️ VÍ VÉ THƯỜNG: " + count + " VÉ</bold></gradient>"));
             List<String> rawLore = List.of(
                     "",
-                    " <yellow>Số dư vé quay hiện có: <gold><bold>" + count + " vé</bold></gold>",
-                    " <gray>Mỗi Vé Quay cho phép bạn quay <green><bold>MIỄN PHÍ 100%</bold></green>",
-                    " <gray>ở bất kỳ mức cược nào (<gold>1k$, 10k$, 100k$, 500k$</gold>)!</gray>",
+                    " <yellow>Vé Quay Thường hiện có: <gold><bold>" + count + " vé</bold></gold>",
+                    " <gray>Áp dụng quay <green><bold>MIỄN PHÍ 100%</bold></green> cho các</gray>",
+                    " <gray>mức cược: <gold>1,000$</gold>, <gold>10,000$</gold>, <gold>100,000$</gold>!</gray>",
                     "",
-                    " <yellow>👉 Mẹo: Hãy chọn mức cược 500,000$ để nhận thưởng lớn nhất khi dùng vé!"
+                    " <yellow>👉 Cầm Vé Thường (CMD 777) nhấp chuột phải để nạp!"
             );
             meta.lore(rawLore.stream().map(mm::deserialize).toList());
             ticketItem.setItemMeta(meta);
         }
         gui.setItem(44, ticketItem);
+    }
+
+    public void updateVipTicketItem() {
+        int count = databaseManager != null ? databaseManager.getVipTickets(player.getUniqueId()) : 0;
+        ItemStack vipItem = configManager.createVipTicketItem(1);
+        ItemMeta meta = vipItem.getItemMeta();
+        if (meta != null) {
+            meta.displayName(mm.deserialize("<gradient:#FF0000:#FFD700><bold>🎫 VÍ VÉ VIP HIGHROLLER: " + count + " VÉ</bold></gradient>"));
+            List<String> rawLore = List.of(
+                    "",
+                    " <gold>Vé VIP Highroller hiện có: <yellow><bold>" + count + " vé VIP</bold></yellow>",
+                    " <gray>Đặc quyền quay <green><bold>MIỄN PHÍ 100%</bold></green> cho mức</gray>",
+                    " <gray>cược Tối Đa Táo Bạo: <gold><bold>500,000$</bold></gold>!</gray>",
+                    "",
+                    " <yellow>👉 Cầm Vé VIP (CMD 888) nhấp chuột phải để nạp!"
+            );
+            meta.lore(rawLore.stream().map(mm::deserialize).toList());
+            vipItem.setItemMeta(meta);
+        }
+        gui.setItem(41, vipItem);
     }
 
     public void updateJackpotHUD() {
@@ -394,6 +417,7 @@ public class SoloSlotSession {
         updateAutoSpinItem();
         updateHistoryButtonItem();
         updateTicketItem();
+        updateVipTicketItem();
     }
 
     public void setBetAmount(double amount) {
@@ -408,17 +432,37 @@ public class SoloSlotSession {
     public void executeSpin() {
         if (isSpinning) return;
 
-        int availableTickets = databaseManager != null ? databaseManager.getTickets(player.getUniqueId()) : 0;
+        int availableStandardTickets = databaseManager != null ? databaseManager.getTickets(player.getUniqueId()) : 0;
+        int availableVipTickets = databaseManager != null ? databaseManager.getVipTickets(player.getUniqueId()) : 0;
         boolean isUsingTicket = false;
 
-        if (availableTickets > 0) {
-            boolean deducted = databaseManager.removeTickets(player.getUniqueId(), 1);
-            if (deducted) {
-                isUsingTicket = true;
-                int remaining = availableTickets - 1;
+        if (currentBetAmount >= 500000.0) {
+            // Mức cược 500k -> Cần Vé VIP Highroller!
+            if (availableVipTickets > 0) {
+                boolean deducted = databaseManager.removeVipTickets(player.getUniqueId(), 1);
+                if (deducted) {
+                    isUsingTicket = true;
+                    int remaining = availableVipTickets - 1;
+                    player.sendMessage(mm.deserialize(
+                            "<gradient:#FF0000:#FFD700><bold>🎫 [VÉ VIP HIGHROLLER]</bold></gradient> <green>Đã dùng 1x Vé VIP Highroller cho lượt cược Tối Đa <gold><bold>500,000$</bold></gold>! (Còn lại: <gold><bold>" + remaining + " vé VIP</bold></gold>)</green>"
+                    ));
+                }
+            } else if (availableStandardTickets > 0) {
                 player.sendMessage(mm.deserialize(
-                        "<gradient:#FFD700:#FFA500><bold>🎟️ [VÉ QUAY CASINO]</bold></gradient> <green>Đã dùng 1x Vé Quay cho mức cược <gold><bold>" + ConfigManager.formatMoney(currentBetAmount) + "$</bold></gold>! (Còn lại: <gold><bold>" + remaining + " vé</bold></gold>)</green>"
+                        "<red>⚠️ Vé Quay Thường chỉ áp dụng cho cược 1k, 10k, 100k! Cược 500,000$ cần Vé VIP Highroller (CMD 888) hoặc tiền Vault.</red>"
                 ));
+            }
+        } else {
+            // Mức cược 1k, 10k, 100k -> Dùng Vé Quay Thường!
+            if (availableStandardTickets > 0) {
+                boolean deducted = databaseManager.removeTickets(player.getUniqueId(), 1);
+                if (deducted) {
+                    isUsingTicket = true;
+                    int remaining = availableStandardTickets - 1;
+                    player.sendMessage(mm.deserialize(
+                            "<gradient:#FFD700:#FFA500><bold>🎟️ [VÉ QUAY CASINO]</bold></gradient> <green>Đã dùng 1x Vé Quay Thường cho mức cược <gold><bold>" + ConfigManager.formatMoney(currentBetAmount) + "$</bold></gold>! (Còn lại: <gold><bold>" + remaining + " vé</bold></gold>)</green>"
+                    ));
+                }
             }
         }
 
