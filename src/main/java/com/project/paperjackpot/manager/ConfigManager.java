@@ -235,6 +235,9 @@ public class ConfigManager {
 
             org.bukkit.NamespacedKey key = new org.bukkit.NamespacedKey(plugin, "jackpot_ticket");
             meta.getPersistentDataContainer().set(key, org.bukkit.persistence.PersistentDataType.STRING, "JACKPOT_TICKET_V1");
+
+            org.bukkit.NamespacedKey serialKey = new org.bukkit.NamespacedKey(plugin, "jackpot_ticket_serial");
+            meta.getPersistentDataContainer().set(serialKey, org.bukkit.persistence.PersistentDataType.STRING, java.util.UUID.randomUUID().toString());
             item.setItemMeta(meta);
         }
         return item;
@@ -264,6 +267,9 @@ public class ConfigManager {
 
             org.bukkit.NamespacedKey key = new org.bukkit.NamespacedKey(plugin, "jackpot_ticket");
             meta.getPersistentDataContainer().set(key, org.bukkit.persistence.PersistentDataType.STRING, "JACKPOT_TICKET_VIP");
+
+            org.bukkit.NamespacedKey serialKey = new org.bukkit.NamespacedKey(plugin, "jackpot_ticket_serial");
+            meta.getPersistentDataContainer().set(serialKey, org.bukkit.persistence.PersistentDataType.STRING, java.util.UUID.randomUUID().toString());
             item.setItemMeta(meta);
         }
         return item;
@@ -275,6 +281,14 @@ public class ConfigManager {
         if (meta == null) return false;
         org.bukkit.NamespacedKey key = new org.bukkit.NamespacedKey(plugin, "jackpot_ticket");
         return "JACKPOT_TICKET_VIP".equals(meta.getPersistentDataContainer().get(key, org.bukkit.persistence.PersistentDataType.STRING));
+    }
+
+    public String getTicketSerialUuid(ItemStack item) {
+        if (item == null || item.getType() == Material.AIR || !item.hasItemMeta()) return null;
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return null;
+        org.bukkit.NamespacedKey serialKey = new org.bukkit.NamespacedKey(plugin, "jackpot_ticket_serial");
+        return meta.getPersistentDataContainer().get(serialKey, org.bukkit.persistence.PersistentDataType.STRING);
     }
 
     public static String formatMoney(double amount) {

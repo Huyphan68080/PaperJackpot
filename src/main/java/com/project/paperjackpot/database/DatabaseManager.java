@@ -94,6 +94,15 @@ public class DatabaseManager {
                 try {
                     stmt.executeUpdate("ALTER TABLE player_tickets ADD COLUMN vip_tickets INTEGER NOT NULL DEFAULT 0");
                 } catch (SQLException ignored) {} // Cột đã tồn tại
+
+                // Bảng Anti-Dupe: Lưu mã định danh Serial UUID của từng tấm vé vật phẩm đã được nạp
+                stmt.executeUpdate(
+                        "CREATE TABLE IF NOT EXISTS redeemed_ticket_serials (" +
+                                "ticket_uuid TEXT PRIMARY KEY, " +
+                                "redeemed_by TEXT NOT NULL, " +
+                                "redeemed_at INTEGER NOT NULL" +
+                                ")"
+                );
             }
 
             plugin.getLogger().info("[Database] CSDL SQLite đã khởi tạo thành công!");
@@ -325,14 +334,12 @@ public class DatabaseManager {
     }
 
     public boolean removeTickets(UUID uuid, int count) {
-        int current = getTickets(uuid);
-        if (current < count) return false;
-        String sql = "UPDATE player_tickets SET tickets = tickets - ? WHERE player_uuid = ?";
+        String sql = "UPDATE player_tickets SET tickets = tickets - ? WHERE player_uuid = ? AND tickets >= ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, count);
             ps.setString(2, uuid.toString());
-            ps.executeUpdate();
-            return true;
+            ps.setInt(3, count);
+            return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             plugin.getLogger().warning("[Database] Lỗi trừ vé quay: " + e.getMessage());
             return false;
@@ -366,16 +373,42 @@ public class DatabaseManager {
     }
 
     public boolean removeVipTickets(UUID uuid, int count) {
-        int current = getVipTickets(uuid);
-        if (current < count) return false;
-        String sql = "UPDATE player_tickets SET vip_tickets = vip_tickets - ? WHERE player_uuid = ?";
+        String sql = "UPDATE player_tickets SET vip_tickets = vip_tickets - ? WHERE player_uuid = ? AND vip_tickets >= ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, count);
             ps.setString(2, uuid.toString());
-            ps.executeUpdate();
-            return true;
+            ps.setInt(3, count);
+            return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             plugin.getLogger().warning("[Database] Lỗi trừ vé VIP: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // ===== PHẦN TÍNH NĂNG CHỐNG DUPE TẤM VÉ BẰNG MÃ SERIAL NBT UUID =====
+    public boolean isTicketSerialRedeemed(String ticketSerialUuid) {
+        if (ticketSerialUuid == null || ticketSerialUuid.isEmpty()) return false;
+        String sql = "SELECT 1 FROM redeemed_ticket_serials WHERE ticket_uuid = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, ticketSerialUuid);
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            plugin.getLogger().warning("[Database Anti-Dupe] Lỗi kiểm tra vé trùng lặp: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean markTicketSerialRedeemed(String ticketSerialUuid, UUID playerUuid) {
+        if (ticketSerialUuid == null || ticketSerialUuid.isEmpty()) return true;
+        String sql = "INSERT INTO redeemed_ticket_serials (ticket_uuid, redeemed_by, redeemed_at) VALUES (?, ?, ?)";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, ticketSerialUuid);
+            ps.setString(2, playerUuid.toString());
+            ps.setLong(3, System.currentTimeMillis());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            plugin.getLogger().warning("[Database Anti-Dupe] Lỗi đánh dấu vé đã sử dụng (Phát hiện trùng mã Serial): " + e.getMessage());
             return false;
         }
     }
