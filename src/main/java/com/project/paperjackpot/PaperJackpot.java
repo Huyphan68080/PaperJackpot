@@ -57,6 +57,7 @@ public class PaperJackpot extends JavaPlugin {
         jackpotCommand = new JackpotCommand(this);
         if (getCommand("jackpot") != null) {
             getCommand("jackpot").setExecutor(jackpotCommand);
+            getCommand("jackpot").setTabCompleter(jackpotCommand);
         }
         getServer().getPluginManager().registerEvents(new MenuListener(this), this);
 

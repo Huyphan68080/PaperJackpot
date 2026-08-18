@@ -32,7 +32,22 @@ import java.util.List;
  *   - /jackpot reload (Reload cấu hình)
  *   - /jackpot history (Xem lịch sử CSDL)
  */
-public class JackpotCommand implements CommandExecutor {
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * JackpotCommand - Lệnh chính /jackpot (hoặc /jp, /quayhu).
+ */
+public class JackpotCommand implements CommandExecutor, TabCompleter {
 
     private final PaperJackpot plugin;
     private final ConfigManager configManager;
@@ -52,6 +67,17 @@ public class JackpotCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
                              @NotNull String label, @NotNull String[] args) {
+        try {
+            return handleCommand(sender, command, label, args);
+        } catch (Exception e) {
+            plugin.getLogger().severe("[JackpotCommand] Lỗi thực thi lệnh /" + label + ": " + e.getMessage());
+            e.printStackTrace();
+            sender.sendMessage(mm.deserialize("<red>❌ Có lỗi xảy ra khi dùng lệnh /jackpot: " + e.getMessage() + "</red>"));
+            return true;
+        }
+    }
+
+    private boolean handleCommand(CommandSender sender, Command command, String label, String[] args) {
 
         if (args.length > 0) {
             String subCmd = args[0].toLowerCase();
@@ -366,5 +392,30 @@ public class JackpotCommand implements CommandExecutor {
     private boolean hasAdminPermission(CommandSender sender) {
         if (sender.isOp()) return true;
         return sender.hasPermission("paperjackpot.admin") || sender.hasPermission("paperjackpot.testjackpot") || sender.hasPermission("paperjackpot.*");
+    }
+
+    @Override
+    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
+        if (args.length == 1) {
+            List<String> list = new ArrayList<>(List.of("top", "stats", "tickets", "ve", "time"));
+            if (hasAdminPermission(sender)) {
+                list.addAll(List.of("giveticket", "giveitemticket", "givevipticket", "giveitemvipticket", "givevipitem", "testseason", "testhappyhour", "testjackpot", "test", "reload", "history", "setpool"));
+            }
+            String current = args[0].toLowerCase();
+            return list.stream().filter(s -> s.startsWith(current)).toList();
+        }
+        if (args.length == 2 && hasAdminPermission(sender)) {
+            String sub = args[0].toLowerCase();
+            if (sub.startsWith("give")) {
+                return org.bukkit.Bukkit.getOnlinePlayers().stream().map(Player::getName).filter(n -> n.toLowerCase().startsWith(args[1].toLowerCase())).toList();
+            }
+        }
+        if (args.length == 3 && hasAdminPermission(sender)) {
+            String sub = args[0].toLowerCase();
+            if (sub.startsWith("give")) {
+                return List.of("1", "5", "10", "64");
+            }
+        }
+        return List.of();
     }
 }
