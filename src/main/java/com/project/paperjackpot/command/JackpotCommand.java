@@ -91,10 +91,7 @@ public class JackpotCommand implements CommandExecutor {
                 }
                 if (sender instanceof Player player) {
                     if (plugin.getHologramManager() != null) {
-                        plugin.getHologramManager().setHologramLocation(player.getLocation().add(0, 1.2, 0));
-                        player.sendMessage(mm.deserialize(
-                                "<gradient:gold:yellow><bold>✨ [HOLOGRAM 3D CASINO]</bold></gradient> <green>Đã tạo Bảng Xếp Hạng Top 10 3D nổi mượt mà tại vị trí đứng của bạn!</green>"
-                        ));
+                        plugin.getHologramManager().createHologramWithPlugin(player);
                     }
                 } else {
                     sender.sendMessage(mm.deserialize("<red>Chỉ người chơi trong game mới đặt được Hologram!</red>"));
@@ -108,9 +105,8 @@ public class JackpotCommand implements CommandExecutor {
                     sender.sendMessage(configManager.getNoPermissionMsg());
                     return true;
                 }
-                if (plugin.getHologramManager() != null) {
-                    plugin.getHologramManager().removeHologram();
-                    sender.sendMessage(mm.deserialize("<green>✅ Đã xóa Hologram 3D Top 10 khỏi thế giới!</green>"));
+                if (sender instanceof Player player && plugin.getHologramManager() != null) {
+                    plugin.getHologramManager().removeHologramWithPlugin(player);
                 }
                 return true;
             }
@@ -146,7 +142,7 @@ public class JackpotCommand implements CommandExecutor {
                 }
                 configManager.loadConfig();
                 if (plugin.getHologramManager() != null) {
-                    plugin.getHologramManager().updateHologramDisplay();
+                    plugin.getHologramManager().cleanOldNativeEntities();
                 }
                 sender.sendMessage(configManager.getReloadSuccessMsg());
                 return true;
