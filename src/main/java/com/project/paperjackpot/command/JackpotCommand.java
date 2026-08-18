@@ -3,6 +3,7 @@ package com.project.paperjackpot.command;
 import com.project.paperjackpot.PaperJackpot;
 import com.project.paperjackpot.database.DatabaseManager;
 import com.project.paperjackpot.game.GameMode;
+import com.project.paperjackpot.gui.GameSelectGui;
 import com.project.paperjackpot.gui.LeaderboardGui;
 import com.project.paperjackpot.gui.PlayerStatsGui;
 import com.project.paperjackpot.manager.ConfigManager;
@@ -151,14 +152,13 @@ public class JackpotCommand implements CommandExecutor {
             return true;
         }
 
-        // Vào thẳng phòng chơi cá nhân
+        // Mở Giao Diện Chọn Trò Chơi Nổ Hũ Casino
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(mm.deserialize("<red>Chỉ người chơi trong game mới có thể chơi Nổ Hũ Jackpot!"));
+            sender.sendMessage(mm.deserialize("<red>Chỉ người chơi trong game mới có thể chơi Nổ Hũ Jackpot!</red>"));
             return true;
         }
 
-        SoloSlotSession session = plugin.getOrCreateSession(player, GameMode.MINERAL_SLOT);
-        session.open(true);
+        new GameSelectGui(plugin).open(player);
         return true;
     }
 
