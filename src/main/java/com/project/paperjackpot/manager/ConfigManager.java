@@ -4,6 +4,8 @@ import com.project.paperjackpot.PaperJackpot;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -215,6 +217,35 @@ public class ConfigManager {
         return mm.deserialize(happyHourEndMsg
                 .replace("{start}", String.valueOf(happyHourStart))
                 .replace("{end}", String.valueOf(happyHourEnd)));
+    }
+
+    public ItemStack createTicketItem(int amount) {
+        ItemStack item = new ItemStack(Material.PAPER, amount);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.displayName(mm.deserialize("<gradient:#FFD700:#FFA500><bold>🎟️ VÉ QUAY CASINO JACKPOT</bold></gradient>"));
+            meta.lore(java.util.List.of(
+                    mm.deserialize("<yellow>Vé Quay Nổ Hũ Cao Cấp Server Casino</yellow>"),
+                    mm.deserialize("<gray>Sử dụng vé này để quay 1 lượt cược miễn phí!</gray>"),
+                    mm.deserialize("<gray>👉 Nhấp chuột phải khi cầm trên tay để nạp vào ví vé.</gray>")
+            ));
+            meta.setCustomModelData(777);
+            meta.addEnchant(org.bukkit.enchantments.Enchantment.UNBREAKING, 1, true);
+            meta.addItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
+
+            org.bukkit.NamespacedKey key = new org.bukkit.NamespacedKey(plugin, "jackpot_ticket");
+            meta.getPersistentDataContainer().set(key, org.bukkit.persistence.PersistentDataType.STRING, "JACKPOT_TICKET_V1");
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    public boolean isTicketItem(ItemStack item) {
+        if (item == null || item.getType() == Material.AIR || !item.hasItemMeta()) return false;
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return false;
+        org.bukkit.NamespacedKey key = new org.bukkit.NamespacedKey(plugin, "jackpot_ticket");
+        return "JACKPOT_TICKET_V1".equals(meta.getPersistentDataContainer().get(key, org.bukkit.persistence.PersistentDataType.STRING));
     }
 
     public static String formatMoney(double amount) {

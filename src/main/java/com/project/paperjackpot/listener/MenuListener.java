@@ -34,6 +34,38 @@ public class MenuListener implements Listener {
         }
     }
 
+    @EventHandler
+    public void onPlayerInteract(org.bukkit.event.player.PlayerInteractEvent event) {
+        if (event.getAction() != org.bukkit.event.block.Action.RIGHT_CLICK_AIR && event.getAction() != org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK) {
+            return;
+        }
+
+        Player player = event.getPlayer();
+        org.bukkit.inventory.ItemStack item = event.getItem();
+
+        if (plugin.getConfigManager().isTicketItem(item)) {
+            event.setCancelled(true);
+            if (item != null) {
+                if (item.getAmount() > 1) {
+                    item.setAmount(item.getAmount() - 1);
+                } else {
+                    if (event.getHand() != null) {
+                        player.getInventory().setItem(event.getHand(), null);
+                    }
+                }
+            }
+
+            plugin.getDatabaseManager().addTickets(player.getUniqueId(), 1);
+            int newBalance = plugin.getDatabaseManager().getTickets(player.getUniqueId());
+
+            net.kyori.adventure.text.minimessage.MiniMessage mm = plugin.getConfigManager().getMiniMessage();
+            player.sendMessage(mm.deserialize(
+                    "<gradient:#FFD700:#FFA500><bold>🎟️ [VÉ CASINO JACKPOT]</bold></gradient> <green>Đã nạp 1x Vé Quay vào ví tài khoản của bạn! (Tổng cộng: <gold><bold>" + newBalance + " vé</bold></gold>)</green>"
+            ));
+            player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.6f);
+        }
+    }
+
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;

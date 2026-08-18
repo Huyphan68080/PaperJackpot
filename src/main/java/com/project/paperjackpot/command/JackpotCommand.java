@@ -126,7 +126,71 @@ public class JackpotCommand implements CommandExecutor {
                 return true;
             }
 
-            // 8. LỆNH SET QUỸ JACKPOT TÍCH LŨY: /jackpot setpool <số tiền>
+            // 8. LỆNH TRAO VÉ ẢO CSDl: /jackpot giveticket <player> <số lượng>
+            if (subCmd.equals("giveticket") || subCmd.equals("addticket")) {
+                if (!hasAdminPermission(sender)) {
+                    sender.sendMessage(configManager.getNoPermissionMsg());
+                    return true;
+                }
+                if (args.length > 2) {
+                    Player target = org.bukkit.Bukkit.getPlayer(args[1]);
+                    if (target == null) {
+                        sender.sendMessage(mm.deserialize("<red>Người chơi không online hoặc không tồn tại!</red>"));
+                        return true;
+                    }
+                    try {
+                        int amount = Integer.parseInt(args[2]);
+                        databaseManager.addTickets(target.getUniqueId(), amount);
+                        sender.sendMessage(mm.deserialize("<green>✅ Đã cấp <gold><bold>" + amount + " Vé Quay Casino</bold></gold> vào ví CSDL của người chơi <yellow>" + target.getName() + "</yellow>!</green>"));
+                        target.sendMessage(mm.deserialize("<gradient:#FFD700:#FFA500><bold>🎟️ [VÉ CASINO]</bold></gradient> <green>Bạn vừa được Admin thưởng <gold><bold>" + amount + " Vé Quay Casino</bold></gold>!</green>"));
+                    } catch (NumberFormatException e) {
+                        sender.sendMessage(mm.deserialize("<red>Số lượng không hợp lệ!</red>"));
+                    }
+                } else {
+                    sender.sendMessage(mm.deserialize("<red>Cú pháp: /jackpot giveticket <người_chơi> <số_lượng></red>"));
+                }
+                return true;
+            }
+
+            // 9. LỆNH TRAO VAT PHAM VE ITEM KHO DO: /jackpot giveitemticket <player> <số lượng>
+            if (subCmd.equals("giveitemticket") || subCmd.equals("giveticketitem") || subCmd.equals("giveitem")) {
+                if (!hasAdminPermission(sender)) {
+                    sender.sendMessage(configManager.getNoPermissionMsg());
+                    return true;
+                }
+                if (args.length > 2) {
+                    Player target = org.bukkit.Bukkit.getPlayer(args[1]);
+                    if (target == null) {
+                        sender.sendMessage(mm.deserialize("<red>Người chơi không online hoặc không tồn tại!</red>"));
+                        return true;
+                    }
+                    try {
+                        int amount = Integer.parseInt(args[2]);
+                        org.bukkit.inventory.ItemStack ticketStack = configManager.createTicketItem(amount);
+                        target.getInventory().addItem(ticketStack);
+                        sender.sendMessage(mm.deserialize("<green>✅ Đã tạo & trao <gold><bold>" + amount + "x Tấm Vé Casino (Item chính chủ)</bold></gold> vào kho đồ người chơi <yellow>" + target.getName() + "</yellow>!</green>"));
+                        target.sendMessage(mm.deserialize("<gradient:#FFD700:#FFA500><bold>🎟️ [VÉ CASINO ITEM]</bold></gradient> <green>Bạn vừa nhận được <gold><bold>" + amount + "x Tấm Vé Quay Casino</bold></gold> trong kho đồ! Cầm trên tay nhấp chuột phải để nạp vào tài khoản.</green>"));
+                    } catch (NumberFormatException e) {
+                        sender.sendMessage(mm.deserialize("<red>Số lượng không hợp lệ!</red>"));
+                    }
+                } else {
+                    sender.sendMessage(mm.deserialize("<red>Cú pháp: /jackpot giveitemticket <người_chơi> <số_lượng></red>"));
+                }
+                return true;
+            }
+
+            // 10. LỆNH KIỂM TRA VÉ VÍ CÁ NHÂN: /jackpot tickets
+            if (subCmd.equals("tickets") || subCmd.equals("ve")) {
+                if (sender instanceof Player player) {
+                    int count = databaseManager.getTickets(player.getUniqueId());
+                    player.sendMessage(mm.deserialize("<gradient:#FFD700:#FFA500><bold>🎟️ [VÍ VÉ QUAY CASINO]</bold></gradient> <green>Số dư vé quay của bạn hiện tại: <gold><bold>" + count + " vé</bold></gold>.</green>"));
+                } else {
+                    sender.sendMessage(mm.deserialize("<red>Chỉ người chơi trong game mới dùng được lệnh này!</red>"));
+                }
+                return true;
+            }
+
+            // 11. LỆNH SET QUỸ JACKPOT TÍCH LŨY: /jackpot setpool <số tiền>
             if (subCmd.equals("setpool") || subCmd.equals("sethuff")) {
                 if (!hasAdminPermission(sender)) {
                     sender.sendMessage(configManager.getNoPermissionMsg());

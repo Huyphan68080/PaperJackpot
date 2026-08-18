@@ -81,6 +81,14 @@ public class DatabaseManager {
                                 "last_reward_timestamp INTEGER NOT NULL" +
                                 ")"
                 );
+
+                // Bảng lưu vé quay cá nhân
+                stmt.executeUpdate(
+                        "CREATE TABLE IF NOT EXISTS player_tickets (" +
+                                "player_uuid TEXT PRIMARY KEY, " +
+                                "tickets INTEGER NOT NULL DEFAULT 0" +
+                                ")"
+                );
             }
 
             plugin.getLogger().info("[Database] CSDL SQLite đã khởi tạo thành công!");
@@ -275,6 +283,47 @@ public class DatabaseManager {
             plugin.getLogger().warning("[Database] Lỗi đọc lịch sử: " + e.getMessage());
         }
         return history;
+    }
+
+    public int getTickets(UUID uuid) {
+        try (PreparedStatement ps = connection.prepareStatement("SELECT tickets FROM player_tickets WHERE player_uuid = ?")) {
+            ps.setString(1, uuid.toString());
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("tickets");
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().warning("[Database] Lỗi đọc vé quay: " + e.getMessage());
+        }
+        return 0;
+    }
+
+    public void addTickets(UUID uuid, int count) {
+        String sql = "INSERT INTO player_tickets (player_uuid, tickets) VALUES (?, ?) " +
+                "ON CONFLICT(player_uuid) DO UPDATE SET tickets = tickets + ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            ps.setInt(2, count);
+            ps.setInt(3, count);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            plugin.getLogger().warning("[Database] Lỗi thêm vé quay: " + e.getMessage());
+        }
+    }
+
+    public boolean removeTickets(UUID uuid, int count) {
+        int current = getTickets(uuid);
+        if (current < count) return false;
+        String sql = "UPDATE player_tickets SET tickets = tickets - ? WHERE player_uuid = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, count);
+            ps.setString(2, uuid.toString());
+            ps.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            plugin.getLogger().warning("[Database] Lỗi trừ vé quay: " + e.getMessage());
+            return false;
+        }
     }
 
     public void close() {
