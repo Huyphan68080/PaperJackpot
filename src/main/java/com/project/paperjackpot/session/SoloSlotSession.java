@@ -50,6 +50,7 @@ public class SoloSlotSession {
 
     private boolean isSpinning = false;
     private boolean forceNextJackpot = false;
+    private boolean isUsingTicket = false;
 
     // Tính năng mới: Auto Spin & Streak Bonus
     private boolean isAutoSpinning = false;
@@ -421,6 +422,8 @@ public class SoloSlotSession {
             }
         }
 
+        this.isUsingTicket = isUsingTicket;
+
         if (!isUsingTicket) {
             Economy economy = plugin.getEconomy();
             if (economy == null || !economy.has(player, currentBetAmount)) {
@@ -629,17 +632,29 @@ public class SoloSlotSession {
                 gui.setItem(24, buildItem(Material.LIME_STAINED_GLASS_PANE, "<green><bold>▶ THẮNG X2 ◀</bold></green>", List.of()));
             }
         } else {
-            // Thua cược -> Nạp 100% tiền thua vào Hũ Tích Lũy
-            jackpotManager.addLossToPool(currentBetAmount);
-            lastResultText = "<red><bold>✘ THUA -" + ConfigManager.formatMoney(currentBetAmount) + "$</bold></red>";
-
-            player.sendMessage(configManager.getLoseMsg(currentBetAmount));
+            // Thua cược
+            if (!isUsingTicket) {
+                jackpotManager.addLossToPool(currentBetAmount);
+                lastResultText = "<red><bold>✘ THUA -" + ConfigManager.formatMoney(currentBetAmount) + "$</bold></red>";
+                player.sendMessage(configManager.getLoseMsg(currentBetAmount));
+            } else {
+                lastResultText = "<red><bold>✘ KHÔNG TRÚNG (ĐÃ DÙNG VÉ QUAY)</bold></red>";
+                player.sendMessage(mm.deserialize(
+                        "<red><bold>✘ KHÔNG TRÚNG!</bold></red> <gray>Lượt dùng Vé Quay Casino không may mắn. Cố gắng lượt tiếp theo nhé!</gray>"
+                ));
+            }
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 0.8f);
 
             // Đổi nút Slot 49 thành Banner Báo Thua rõ ràng
-            gui.setItem(49, buildItem(Material.RED_STAINED_GLASS_PANE,
-                    "<red><bold>✘ KHÔNG TRÚNG (THUA -" + ConfigManager.formatMoney(currentBetAmount) + "$) ✘</bold></red>",
-                    List.of("<gray>Tiền thua đã tích lũy 100% vào Quỹ Hũ Server!", "", "<yellow>👉 Click để thử vận may lượt tiếp theo!")));
+            if (!isUsingTicket) {
+                gui.setItem(49, buildItem(Material.RED_STAINED_GLASS_PANE,
+                        "<red><bold>✘ KHÔNG TRÚNG (THUA -" + ConfigManager.formatMoney(currentBetAmount) + "$) ✘</bold></red>",
+                        List.of("<gray>Tiền thua đã tích lũy 100% vào Quỹ Hũ Server!", "", "<yellow>👉 Click để thử vận may lượt tiếp theo!")));
+            } else {
+                gui.setItem(49, buildItem(Material.RED_STAINED_GLASS_PANE,
+                        "<red><bold>✘ KHÔNG TRÚNG (ĐÃ DÙNG VÉ QUAY) ✘</bold></red>",
+                        List.of("<gray>Lượt quay bằng Vé Quay Casino không may mắn!", "", "<yellow>👉 Click để thử vận may lượt tiếp theo!")));
+            }
 
             // Đổi đèn Slot 20 & 24 thành màu đỏ
             gui.setItem(20, buildItem(Material.RED_STAINED_GLASS_PANE, "<red><bold>▶ KHÔNG TRÚNG ◀</bold></red>", List.of()));
@@ -652,13 +667,14 @@ public class SoloSlotSession {
                     gameMode.getId(),
                     player.getUniqueId(),
                     player.getName(),
-                    currentBetAmount,
+                    isUsingTicket ? 0 : currentBetAmount,
                     isWin,
                     isWin ? (isJackpot ? currentBetAmount * 5.0 : currentBetAmount * 2.0) : 0,
-                    isJackpot ? "JACKPOT NỔ HŨ X5" : (isWin ? "THẮNG X2 " + detailText : "THUA (Đã cộng vào Hũ)")
+                    isJackpot ? "JACKPOT NỔ HŨ X5" : (isWin ? "THẮNG X2 " + detailText : (isUsingTicket ? "THUA (Vé Quay)" : "THUA (Đã cộng vào Hũ)"))
             );
         }
 
+        isUsingTicket = false;
         isSpinning = false;
         updateJackpotHUD();
     }
