@@ -28,6 +28,9 @@ public class SeasonManager {
 
         // Kiểm tra trao thưởng khi khởi động server
         checkAndRewardWeeklyTop();
+
+        // Chạy timer tự động kiểm tra mỗi 1 giờ (72,000 ticks)
+        Bukkit.getScheduler().runTaskTimer(plugin, this::checkAndRewardWeeklyTop, 72000L, 72000L);
     }
 
     public void checkAndRewardWeeklyTop() {
@@ -56,18 +59,23 @@ public class SeasonManager {
                 configManager.getTop2Reward(),
                 configManager.getTop3Reward()
         };
+        int[] ticketRewards = {10, 5, 3};
 
         StringBuilder broadcastText = new StringBuilder("\n<gradient:gold:yellow><bold>🏆 BẢNG VÀNG CASINO - CHỐT THƯỞNG MÙA GIẢI TUẦN 🏆</bold></gradient>\n");
-        broadcastText.append("<gray>Chúc mừng Top 3 Thần Tài Casino đã nhận thưởng khủng tuần này!</gray>\n");
+        broadcastText.append("<gray>Chúc mừng Top 3 Thần Tài Casino đã nhận thưởng tiền & vé quay khủng tuần này!</gray>\n");
 
         for (int i = 0; i < topList.size() && i < 3; i++) {
             DatabaseManager.TopWinnerEntry entry = topList.get(i);
             double rewardAmount = rewards[i];
+            int ticketCount = ticketRewards[i];
             int rank = i + 1;
 
+            OfflinePlayer target = Bukkit.getOfflinePlayer(entry.name());
             if (economy != null && rewardAmount > 0) {
-                OfflinePlayer target = Bukkit.getOfflinePlayer(entry.name());
                 economy.depositPlayer(target, rewardAmount);
+            }
+            if (databaseManager != null && ticketCount > 0) {
+                databaseManager.addTickets(target.getUniqueId(), ticketCount);
             }
 
             String rankIcon = switch (rank) {
@@ -79,7 +87,8 @@ public class SeasonManager {
 
             broadcastText.append("<yellow>").append(rankIcon).append(": <gold><bold>").append(entry.name())
                     .append("</bold></gold> | Thắng: <green>").append(ConfigManager.formatMoney(entry.totalPayout())).append("$</green>")
-                    .append(" → Nhận Thưởng Đua Top: <gold><bold>+").append(ConfigManager.formatMoney(rewardAmount)).append("$</bold></gold></yellow>\n");
+                    .append(" → Thưởng Đua Top: <gold><bold>+").append(ConfigManager.formatMoney(rewardAmount)).append("$</bold></gold> + <gradient:#FFD700:#FFA500><bold>")
+                    .append(ticketCount).append(" Vé Quay 🎟️</bold></gradient></yellow>\n");
         }
 
         broadcastText.append("<gray>Hãy tiếp tục quay hũ `/jackpot` để chinh phục Mùa Giải mới!</gray>\n");

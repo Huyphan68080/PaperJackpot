@@ -105,6 +105,19 @@ public class JackpotCommand implements CommandExecutor {
                 return true;
             }
 
+            // 5b. LỆNH BẮN THỬ TRAO THƯỞNG MÙA GIẢI TUẦN: /jackpot testseason HOẶC /jackpot triggerseason
+            if (subCmd.equals("testseason") || subCmd.equals("triggerseason")) {
+                if (!hasAdminPermission(sender)) {
+                    sender.sendMessage(configManager.getNoPermissionMsg());
+                    return true;
+                }
+                if (plugin.getSeasonManager() != null) {
+                    plugin.getSeasonManager().processWeeklyRewards(System.currentTimeMillis());
+                    sender.sendMessage(mm.deserialize("<green>✅ Đã phát thử chốt thưởng Mùa Giải Tuần thành công!</green>"));
+                }
+                return true;
+            }
+
             // 6. RELOAD CONFIG: /jackpot reload HOẶC /jackpot rl
             if (subCmd.equals("reload") || subCmd.equals("rl")) {
                 if (!hasAdminPermission(sender)) {
