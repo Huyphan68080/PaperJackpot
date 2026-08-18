@@ -374,10 +374,10 @@ public class SoloSlotSession {
             List<String> rawLore = List.of(
                     "",
                     " <yellow>Số dư vé quay hiện có: <gold><bold>" + count + " vé</bold></gold>",
-                    " <gray>Khi bạn có Vé Quay trong tài khoản, lượt quay</gray>",
-                    " <gray>sẽ <green><bold>TỰ ĐỘNG ƯU TIÊN TRỪ VÉ QUAY</bold></green> trước tiền Vault!</gray>",
+                    " <gray>Mỗi Vé Quay cho phép bạn quay <green><bold>MIỄN PHÍ 100%</bold></green>",
+                    " <gray>ở bất kỳ mức cược nào (<gold>1k$, 10k$, 100k$, 500k$</gold>)!</gray>",
                     "",
-                    " <yellow>👉 Cầm Vé Item nhấp chuột phải để nạp vé vào ví!"
+                    " <yellow>👉 Mẹo: Hãy chọn mức cược 500,000$ để nhận thưởng lớn nhất khi dùng vé!"
             );
             meta.lore(rawLore.stream().map(mm::deserialize).toList());
             ticketItem.setItemMeta(meta);
@@ -417,7 +417,7 @@ public class SoloSlotSession {
                 isUsingTicket = true;
                 int remaining = availableTickets - 1;
                 player.sendMessage(mm.deserialize(
-                        "<gradient:#FFD700:#FFA500><bold>🎟️ [VÉ QUAY CASINO]</bold></gradient> <green>Đã dùng 1x Vé Quay Casino! (Số dư còn lại: <gold><bold>" + remaining + " vé</bold></gold>)</green>"
+                        "<gradient:#FFD700:#FFA500><bold>🎟️ [VÉ QUAY CASINO]</bold></gradient> <green>Đã dùng 1x Vé Quay cho mức cược <gold><bold>" + ConfigManager.formatMoney(currentBetAmount) + "$</bold></gold>! (Còn lại: <gold><bold>" + remaining + " vé</bold></gold>)</green>"
                 ));
             }
         }
