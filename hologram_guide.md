@@ -24,3 +24,23 @@ holograms:
     billboard: CENTER
     shadow: true
 ```
+
+---
+
+## ⚡ CÁC LỆNH RELOAD:
+
+- Reload Bảng Hologram FancyHolograms:
+  ```cmd
+  /fh reload
+  ```
+  *(Hoặc `/fancyholograms reload`)*
+
+- Reload Plugin PaperJackpot:
+  ```cmd
+  /jackpot reload
+  ```
+
+- Reload PlaceholderAPI:
+  ```cmd
+  /papi reload
+  ```
