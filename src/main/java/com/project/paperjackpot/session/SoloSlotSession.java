@@ -139,6 +139,9 @@ public class SoloSlotSession {
         // Slot 43: ⚡ AUTO SPIN (TỰ ĐỘNG QUAY RẢNH TAY)
         updateAutoSpinItem();
 
+        // Slot 44: 🎟️ VÍ VÉ QUAY CASINO
+        updateTicketItem();
+
         // các nút chọn tiền cược (Slots 45-48)
         gui.setItem(45, buildItem(Material.EMERALD, "<green><bold>💵 CƯỢC 1,000$</bold></green>", List.of("<gray>Click để chọn cược 1k")));
         gui.setItem(46, buildItem(Material.GOLD_INGOT, "<gold><bold>💰 CƯỢC 10,000$</bold></gold>", List.of("<gray>Click để chọn cược 10k")));
@@ -361,6 +364,26 @@ public class SoloSlotSession {
         runVerticalSlidingReelAnimationFree();
     }
 
+    public void updateTicketItem() {
+        int count = databaseManager != null ? databaseManager.getTickets(player.getUniqueId()) : 0;
+        ItemStack ticketItem = configManager.createTicketItem(1);
+        ItemMeta meta = ticketItem.getItemMeta();
+        if (meta != null) {
+            meta.displayName(mm.deserialize("<gradient:#FFD700:#FFA500><bold>🎟️ VÍ VÉ QUAY: " + count + " VÉ</bold></gradient>"));
+            List<String> rawLore = List.of(
+                    "",
+                    " <yellow>Số dư vé quay hiện có: <gold><bold>" + count + " vé</bold></gold>",
+                    " <gray>Khi bạn có Vé Quay trong tài khoản, lượt quay</gray>",
+                    " <gray>sẽ <green><bold>TỰ ĐỘNG ƯU TIÊN TRỪ VÉ QUAY</bold></green> trước tiền Vault!</gray>",
+                    "",
+                    " <yellow>👉 Cầm Vé Item nhấp chuột phải để nạp vé vào ví!"
+            );
+            meta.lore(rawLore.stream().map(mm::deserialize).toList());
+            ticketItem.setItemMeta(meta);
+        }
+        gui.setItem(44, ticketItem);
+    }
+
     public void updateJackpotHUD() {
         jackpotManager.updateGlobalBossBar();
         updateJackpotPoolItem();
@@ -369,6 +392,7 @@ public class SoloSlotSession {
         updateDailyFreeSpinItem();
         updateAutoSpinItem();
         updateHistoryButtonItem();
+        updateTicketItem();
     }
 
     public void setBetAmount(double amount) {
@@ -383,19 +407,35 @@ public class SoloSlotSession {
     public void executeSpin() {
         if (isSpinning) return;
 
-        Economy economy = plugin.getEconomy();
-        if (economy == null || !economy.has(player, currentBetAmount)) {
-            player.sendMessage(configManager.getNotEnoughMoneyMsg(currentBetAmount));
-            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 0.8f);
-            stopAutoSpin();
-            return;
+        int availableTickets = databaseManager != null ? databaseManager.getTickets(player.getUniqueId()) : 0;
+        boolean isUsingTicket = false;
+
+        if (availableTickets > 0) {
+            boolean deducted = databaseManager.removeTickets(player.getUniqueId(), 1);
+            if (deducted) {
+                isUsingTicket = true;
+                int remaining = availableTickets - 1;
+                player.sendMessage(mm.deserialize(
+                        "<gradient:#FFD700:#FFA500><bold>🎟️ [VÉ QUAY CASINO]</bold></gradient> <green>Đã dùng 1x Vé Quay Casino! (Số dư còn lại: <gold><bold>" + remaining + " vé</bold></gold>)</green>"
+                ));
+            }
         }
 
-        var resp = economy.withdrawPlayer(player, currentBetAmount);
-        if (!resp.transactionSuccess()) {
-            player.sendMessage(mm.deserialize("<red>Giao dịch thất bại: " + resp.errorMessage));
-            stopAutoSpin();
-            return;
+        if (!isUsingTicket) {
+            Economy economy = plugin.getEconomy();
+            if (economy == null || !economy.has(player, currentBetAmount)) {
+                player.sendMessage(configManager.getNotEnoughMoneyMsg(currentBetAmount));
+                player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 0.8f);
+                stopAutoSpin();
+                return;
+            }
+
+            var resp = economy.withdrawPlayer(player, currentBetAmount);
+            if (!resp.transactionSuccess()) {
+                player.sendMessage(mm.deserialize("<red>Giao dịch thất bại: " + resp.errorMessage));
+                stopAutoSpin();
+                return;
+            }
         }
 
         // Tăng chuỗi quay
@@ -407,6 +447,7 @@ public class SoloSlotSession {
 
         isSpinning = true;
         updateSpinButton();
+        updateTicketItem();
         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.5f);
 
         runVerticalSlidingReelAnimation();
