@@ -25,9 +25,11 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * SoloSlotSession - Quản lý phiên chơi Quay Hũ Nổ Hũ 3x3 Cá Nhân.
+ * SoloSlotSession - Quản lý phiên chơi Quay Hũ Nổ Hũ 3x3 Cá Nhân (Single Player Instance).
  * Hỗ trợ 3 Chế Độ Nguồn Tiền: TIỀN VAULT ($), VÉ QUAY THƯỜNG (1K-100K), VÉ VIP HIGHROLLER (500K$).
- * Khi chọn Vé Quay Thường: Khóa hoàn toàn ô cược 500k$ (Barrier).
+ * Tỷ lệ: 29.3% Thắng Thường, 0.50% Nổ Hũ Jackpot cố định.
+ * Khi dùng tiền Vault ($): Nạp 100% tiền thua vào Quỹ Jackpot Server!
+ * Khi dùng Vé Quay Thường: Khóa hoàn toàn ô cược 500k$ (Barrier red lock).
  */
 public class SoloSlotSession {
 
