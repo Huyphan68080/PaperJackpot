@@ -14,8 +14,8 @@ settings:
   normal-win-multiplier: 2.0
   jackpot-multiplier: 5.0
 
-  # Tỷ lệ thắng thường (22.0%) và tỷ lệ Nổ Hũ Jackpot (0.50%) cố định
-  win-rate-normal: 22.0
+  # Tỷ lệ thắng thường (25.0%) và tỷ lệ Nổ Hũ Jackpot (0.50%) cố định
+  win-rate-normal: 25.0
   win-rate-happy-hour: 45.0
   jackpot-rate: 0.50
 
