@@ -620,9 +620,11 @@ public class SoloSlotSession {
 
         this.isUsingTicket = isUsingTicket;
 
-        // Tăng chuỗi quay
+        // Tăng chuỗi quay & Reset về 0 khi đủ 10 ván
         streakCount++;
-        if (streakCount >= 10) {
+        boolean isLuckyStreak = (streakCount >= 10);
+        if (isLuckyStreak) {
+            streakCount = 0;
             player.sendMessage(mm.deserialize("<gradient:gold:yellow><bold>🎡 CHUỖI QUAY 10 VÁN!</bold></gradient> <green>Lượt quay này nhận <gold><bold>LUCKY SPIN X1.5 TỶ LỆ THẮNG</bold></gold>!</green>"));
             player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.5f);
         }
@@ -635,15 +637,15 @@ public class SoloSlotSession {
         updateBetButtons();
         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.5f);
 
-        runVerticalSlidingReelAnimation();
+        runVerticalSlidingReelAnimation(isLuckyStreak);
     }
 
     private void runVerticalSlidingReelAnimationFree() {
-        runVerticalSlidingReelAnimation();
+        runVerticalSlidingReelAnimation(false);
     }
 
     // ===== ANIMATION CUỘN DỌC TRƯỢT TỪ TRÊN XUỐNG =====
-    private void runVerticalSlidingReelAnimation() {
+    private void runVerticalSlidingReelAnimation(boolean isLuckyStreak) {
         ThreadLocalRandom rand = ThreadLocalRandom.current();
         double roll = rand.nextDouble(100.0);
 
@@ -651,7 +653,7 @@ public class SoloSlotSession {
         double winChance = happyHour ? configManager.getWinRateHappyHour() : configManager.getWinRateNormal(); // 29.3%
         double jackpotChance = configManager.getJackpotRate(); // 0.50%
 
-        if (streakCount >= 10) {
+        if (isLuckyStreak) {
             winChance = Math.min(85.0, winChance * 1.5);
         }
 
