@@ -9,6 +9,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
+import java.time.DayOfWeek;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 /**
@@ -30,8 +33,8 @@ public class SeasonManager {
         // Kiểm tra trao thưởng khi khởi động server
         checkAndRewardWeeklyTop();
 
-        // Chạy timer tự động kiểm tra mỗi 1 giờ (72,000 ticks)
-        Bukkit.getScheduler().runTaskTimer(plugin, this::checkAndRewardWeeklyTop, 72000L, 72000L);
+        // Chạy timer tự động kiểm tra mỗi 1 phút (1,200 ticks)
+        Bukkit.getScheduler().runTaskTimer(plugin, this::checkAndRewardWeeklyTop, 1200L, 1200L);
     }
 
     public void checkAndRewardWeeklyTop() {
@@ -42,7 +45,12 @@ public class SeasonManager {
         long now = System.currentTimeMillis();
         long oneWeekMs = 7 * 24 * 3600 * 1000L;
 
-        if (now - lastReward >= oneWeekMs) {
+        // Tự động kiểm tra múi giờ Việt Nam (Asia/Ho_Chi_Minh UTC+7):
+        // Nếu hiện tại là Chủ Nhật lúc 23:59 đêm và trong tuần này chưa chốt -> TỰ ĐỘNG CHỐT THƯỞNG & RESET HOÀN TOÀN!
+        ZonedDateTime nowVn = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+        boolean isSundayNight = (nowVn.getDayOfWeek() == DayOfWeek.SUNDAY && nowVn.getHour() == 23 && nowVn.getMinute() >= 55);
+
+        if ((isSundayNight && (now - lastReward >= 6 * 24 * 3600 * 1000L)) || (now - lastReward >= oneWeekMs)) {
             processWeeklyRewards(now);
         }
     }
