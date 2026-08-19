@@ -21,20 +21,31 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.*;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * SoloSlotSession - Phân vùng chơi Quay Hũ Nổ Hũ Cá Nhân Chuyên Biệt duy nhất.
- * Tích hợp Auto Spin, Thưởng Chuỗi Quay May Mắn (10 ván), Sự Kiện Giờ Vàng (Happy Hour 20h-21h) & Lịch Sử Cược.
+ * SoloSlotSession - Quản lý phiên chơi Quay Hũ Nổ Hũ 3x3 Cá Nhân.
+ * Hỗ trợ 3 Chế Độ Nguồn Tiền: TIỀN VAULT ($), VÉ QUAY THƯỜNG (1K-100K), VÉ VIP HIGHROLLER (500K$).
+ * Khi chọn Vé Quay Thường: Khóa hoàn toàn ô cược 500k$ (Barrier).
  */
 public class SoloSlotSession {
 
-    public static final Material[] SYMBOLS = {
-            Material.NETHERITE_BLOCK, Material.DIAMOND, Material.EMERALD,
-            Material.GOLD_INGOT, Material.IRON_INGOT, Material.COPPER_INGOT,
-            Material.COAL, Material.REDSTONE, Material.LAPIS_LAZULI,
-            Material.AMETHYST_SHARD, Material.QUARTZ, Material.ECHO_SHARD
+    public enum PaymentMode {
+        VAULT_MONEY,
+        STANDARD_TICKET,
+        VIP_TICKET
+    }
+
+    private static final Material[] SYMBOLS = {
+            Material.COAL_BLOCK,
+            Material.IRON_BLOCK,
+            Material.GOLD_BLOCK,
+            Material.REDSTONE_BLOCK,
+            Material.LAPIS_BLOCK,
+            Material.EMERALD_BLOCK,
+            Material.DIAMOND_BLOCK,
+            Material.NETHERITE_BLOCK
     };
 
     private final PaperJackpot plugin;
@@ -52,7 +63,10 @@ public class SoloSlotSession {
     private boolean forceNextJackpot = false;
     private boolean isUsingTicket = false;
 
-    // Tính năng mới: Auto Spin & Streak Bonus
+    // Chế độ thanh toán nguồn tiền (Tiền Vault $, Vé Thường, Vé VIP)
+    private PaymentMode paymentMode = PaymentMode.VAULT_MONEY;
+
+    // Tính năng Auto Spin & Streak Bonus
     private boolean isAutoSpinning = false;
     private BukkitTask autoSpinTask = null;
     private int streakCount = 0;
@@ -69,7 +83,6 @@ public class SoloSlotSession {
         this.player = player;
         this.gameMode = gameMode;
 
-        // Tiêu đề ngắn gọn không bị đè các nút giao diện
         Component title = mm.deserialize(configManager.getGuiTitle());
         this.gui = Bukkit.createInventory(null, 54, title);
         this.guiTitlePlain = PlainTextComponentSerializer.plainText().serialize(title);
@@ -86,10 +99,8 @@ public class SoloSlotSession {
         jackpotManager.showBossBarToPlayer(player);
         updateJackpotHUD();
 
-        // Âm thanh chào mừng nhẹ nhàng của game
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.2f);
 
-        // Chỉ hiển thị lời chúc Dealer khi vừa gõ lệnh /jackpot từ Chat (Không hiện lại khi chuyển GUI)
         if (sendWelcomeMessage) {
             player.sendMessage(configManager.getWelcomeDealerMsg(player.getName()));
         }
@@ -97,13 +108,11 @@ public class SoloSlotSession {
 
     public void close() {
         stopAutoSpin();
+        plugin.removeSession(player);
     }
 
-    /**
-     * DỰNG KHUNG GIAO DIỆN PHÒNG QUAY HŨ 3X3 CHUẨN ĐẸP
-     */
     public void setupGuiFrame() {
-        // Viền khung đen
+        // Viền khung đen hàng trên và hàng dưới
         for (int i = 0; i < 9; i++) {
             gui.setItem(i, createDecorPane(Material.BLACK_STAINED_GLASS_PANE));
             gui.setItem(45 + i, createDecorPane(Material.BLACK_STAINED_GLASS_PANE));
@@ -113,20 +122,20 @@ public class SoloSlotSession {
                 9, 10, 11, 15, 16, 17,
                 18, 19, 25, 26,
                 27, 28, 29, 33, 34, 35,
-                36, 37, 38, 39, 40, 41
+                36, 37, 38, 39
         };
         for (int slot : sideSlots) {
             gui.setItem(slot, createDecorPane(Material.GRAY_STAINED_GLASS_PANE));
         }
 
-        // Slot 4 (Chính giữa hàng trên): QUỸ HŨ TÍCH LŨY SERVER
+        // Slot 4: QUỸ JACKPOT TÍCH LŨY SERVER
         updateJackpotPoolItem();
 
         // Đèn mũi tên chỉ hàng thưởng (Slot 20 & 24)
         gui.setItem(20, buildItem(Material.LIME_STAINED_GLASS_PANE, "<green><bold>▶ HÀNG THƯỞNG ◀</bold></green>", List.of()));
         gui.setItem(24, buildItem(Material.LIME_STAINED_GLASS_PANE, "<green><bold>▶ HÀNG THƯỞNG ◀</bold></green>", List.of()));
 
-        // Điền đầy đủ khoáng sản vào Ma trận Quay 3x3 (Slots 12, 13, 14, 21, 22, 23, 30, 31, 32)
+        // Ma trận Quay 3x3 (Slots 12, 13, 14, 21, 22, 23, 30, 31, 32)
         ThreadLocalRandom rand = ThreadLocalRandom.current();
         int[] reelSlots = {12, 13, 14, 21, 22, 23, 30, 31, 32};
         for (int s : reelSlots) {
@@ -134,38 +143,129 @@ public class SoloSlotSession {
             gui.setItem(s, buildSymbolItemStatic(randomMat, mm));
         }
 
-        // Slot 41: 🎫 VÍ VÉ VIP HIGHROLLER (500K$)
-        updateVipTicketItem();
-
-        // Slot 42: 📜 LỊCH SỬ CƯỢC CÁ NHÂN
+        // HÀNG NÚT CHỨC NĂNG CONTROL BAR (Slots 40-44)
+        // Slot 40: 📜 LỊCH SỬ CƯỢC CÁ NHÂN
         updateHistoryButtonItem();
 
-        // Slot 43: ⚡ AUTO SPIN (TỰ ĐỘNG QUAY RẢNH TAY)
+        // Slot 41: 🎫 VÍ VÉ VIP HIGHROLLER
+        updateVipTicketItem();
+
+        // Slot 42: ⚡ AUTO SPIN
         updateAutoSpinItem();
 
-        // Slot 44: 🎟️ VÍ VÉ THƯỜNG (1K - 100K)
+        // Slot 43: 💳 NÚT CHỌN CHẾ ĐỘ NGUỒN TIỀN (Tiền Vault $ / Vé Thường / Vé VIP)
+        updatePaymentModeItem();
+
+        // Slot 44: 🎟️ VÍ VÉ THƯỜNG
         updateTicketItem();
 
-        // các nút chọn tiền cược (Slots 45-48)
-        gui.setItem(45, buildItem(Material.EMERALD, "<green><bold>💵 CƯỢC 1,000$</bold></green>", List.of("<gray>Click để chọn cược 1k")));
-        gui.setItem(46, buildItem(Material.GOLD_INGOT, "<gold><bold>💰 CƯỢC 10,000$</bold></gold>", List.of("<gray>Click để chọn cược 10k")));
-        gui.setItem(47, buildItem(Material.AMETHYST_SHARD, "<light_purple><bold>💎 CƯỢC 100,000$</bold></light_purple>", List.of("<gray>Click để chọn cược 100k")));
-        gui.setItem(48, buildItem(Material.DIAMOND, "<aqua><bold>🔥 CƯỢC 500,000$</bold></aqua>", List.of("<gray>Click để chọn cược 500k (Tối đa)")));
-
-        // Slot 49: Nút BẤM QUAY NGAY TỨC THÌ / KẾT QUẢ VỪA QUAY
+        // HÀNG NÚT THAO TÁC CƯỢC & QUAY (Slots 45-53)
+        updateBetButtons();
         updateSpinButton();
-
-        // Slot 50: 🏆 TOP 10 BẢNG XẾP HẠNG (Tách riêng cho PE/Bedrock)
         updatePlayerPersonalItem();
-
-        // Slot 51: 📈 BẢNG THỐNG KÊ CÁ NHÂN (Tách riêng cho PE/Bedrock)
         updatePlayerStatsItem();
-
-        // Slot 52: 🎁 ĐIỂM DANH LƯỢT QUAY MIỄN PHÍ MỖI NGÀY (24H)
         updateDailyFreeSpinItem();
 
         // Slot 53: Nút Thoát Game
         gui.setItem(53, buildItem(Material.REDSTONE_BLOCK, "<red><bold>🚪 THOÁT RA GAME</bold></red>", List.of("<gray>Đóng giao diện quay hũ")));
+    }
+
+    public void updatePaymentModeItem() {
+        switch (paymentMode) {
+            case VAULT_MONEY -> {
+                gui.setItem(43, buildItem(Material.EMERALD_BLOCK,
+                        "<gradient:#00AA00:#55FF55><bold>💳 CHẾ ĐỘ: DÙNG TIỀN VAULT ($)</bold></gradient>",
+                        List.of(
+                                "",
+                                " <green>✔ Đang chọn: Nguồn tiền xu Vault ($)</green>",
+                                " <gray>Cho phép đặt cược mọi hạn mức từ 1k$ đến 500k$.",
+                                "",
+                                " <yellow>👉 CLICK ĐỂ CHUYỂN: DÙNG VÉ THƯỜNG (1K-100K)"
+                        )));
+            }
+            case STANDARD_TICKET -> {
+                int count = databaseManager != null ? databaseManager.getTickets(player.getUniqueId()) : 0;
+                ItemStack item = configManager.createTicketItem(1);
+                ItemMeta meta = item.getItemMeta();
+                if (meta != null) {
+                    meta.displayName(mm.deserialize("<gradient:#FFD700:#FFA500><bold>🎟️ CHẾ ĐỘ: DÙNG VÉ THƯỜNG (1K-100K)</bold></gradient>"));
+                    meta.lore(List.of(
+                            "",
+                            " <yellow>✔ Đang chọn: Vé Quay Casino Hạng Thường</yellow>",
+                            " <gray>Số dư khả dụng: <gold><bold>" + count + " vé</bold></gold></gray>",
+                            " <red>🔒 Mức cược 500k$ SẼ BỊ KHÓA KHÔNG CHO CHỌN!</red>",
+                            "",
+                            " <yellow>👉 CLICK ĐỂ CHUYỂN: DÙNG VÉ VIP HIGHROLLER (500K$)"
+                    ).stream().map(mm::deserialize).toList());
+                    item.setItemMeta(meta);
+                }
+                gui.setItem(43, item);
+            }
+            case VIP_TICKET -> {
+                int count = databaseManager != null ? databaseManager.getVipTickets(player.getUniqueId()) : 0;
+                ItemStack item = configManager.createVipTicketItem(1);
+                ItemMeta meta = item.getItemMeta();
+                if (meta != null) {
+                    meta.displayName(mm.deserialize("<gradient:#FF0000:#FFD700><bold>🎫 CHẾ ĐỘ: DÙNG VÉ VIP HIGHROLLER (500K$)</bold></gradient>"));
+                    meta.lore(List.of(
+                            "",
+                            " <gold>✔ Đang chọn: Vé VIP Highroller (500k$)</gold>",
+                            " <gray>Số dư khả dụng: <yellow><bold>" + count + " vé VIP</bold></yellow></gray>",
+                            " <gray>Tự động chọn sẵn mức cược Tối Đa 500,000$!</gray>",
+                            "",
+                            " <yellow>👉 CLICK ĐỂ CHUYỂN: DÙNG TIỀN VAULT ($)"
+                    ).stream().map(mm::deserialize).toList());
+                    item.setItemMeta(meta);
+                }
+                gui.setItem(43, item);
+            }
+        }
+    }
+
+    public void cyclePaymentMode() {
+        if (isSpinning) return;
+        switch (paymentMode) {
+            case VAULT_MONEY -> {
+                paymentMode = PaymentMode.STANDARD_TICKET;
+                if (currentBetAmount > 100000.0) {
+                    currentBetAmount = 100000.0;
+                }
+                player.sendMessage(mm.deserialize("<gradient:#FFD700:#FFA500><bold>🎟️ [PHƯƠNG THỨC CƯỢC]</bold></gradient> <green>Đã chuyển sang dùng <gold><bold>Vé Quay Thường (1k-100k)</bold></gold>! Mức cược 500k$ đã được khóa.</green>"));
+            }
+            case STANDARD_TICKET -> {
+                paymentMode = PaymentMode.VIP_TICKET;
+                currentBetAmount = 500000.0;
+                player.sendMessage(mm.deserialize("<gradient:#FF0000:#FFD700><bold>🎫 [PHƯƠNG THỨC CƯỢC]</bold></gradient> <green>Đã chuyển sang dùng <gold><bold>Vé VIP Highroller (500k$)</bold></gold>!</green>"));
+            }
+            case VIP_TICKET -> {
+                paymentMode = PaymentMode.VAULT_MONEY;
+                player.sendMessage(mm.deserialize("<gradient:#00AA00:#55FF55><bold>💳 [PHƯƠNG THỨC CƯỢC]</bold></gradient> <green>Đã chuyển sang dùng <gold><bold>Tiền Mặt Vault ($)</bold></gold>!</green>"));
+            }
+        }
+        player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.8f, 1.2f);
+        updatePaymentModeItem();
+        updateBetButtons();
+        updateSpinButton();
+    }
+
+    public void updateBetButtons() {
+        gui.setItem(45, buildItem(Material.EMERALD, "<green><bold>💵 CƯỢC 1,000$</bold></green>", List.of("<gray>Click để chọn cược 1k")));
+        gui.setItem(46, buildItem(Material.GOLD_INGOT, "<gold><bold>💰 CƯỢC 10,000$</bold></gold>", List.of("<gray>Click để chọn cược 10k")));
+        gui.setItem(47, buildItem(Material.AMETHYST_SHARD, "<light_purple><bold>💎 CƯỢC 100,000$</bold></light_purple>", List.of("<gray>Click để chọn cược 100k")));
+
+        if (paymentMode == PaymentMode.STANDARD_TICKET) {
+            // Khi đang chọn Chế Độ Vé Thường -> Ô cược 500k BỊ KHÓA HOÀN TOÀN (BARRIER)!
+            gui.setItem(48, buildItem(Material.BARRIER,
+                    "<red><bold>🔒 CƯỢC 500,000$ [ĐÃ KHÓA]</bold></red>",
+                    List.of(
+                            "",
+                            " <red>❌ Vé Quay Thường chỉ dành cho cược 1k, 10k, 100k!</red>",
+                            " <gray>Chuyển sang Vé VIP hoặc Tiền Vault để mở khóa cược 500k.",
+                            ""
+                    )));
+        } else {
+            gui.setItem(48, buildItem(Material.DIAMOND, "<aqua><bold>🔥 CƯỢC 500,000$</bold></aqua>", List.of("<gray>Click để chọn cược 500k (Tối đa)")));
+        }
     }
 
     public void updateSpinButton() {
@@ -173,9 +273,16 @@ public class SoloSlotSession {
             gui.setItem(49, buildItem(Material.NETHER_STAR, "<yellow><bold>🎰 ĐANG QUAY TỪ TRÊN XUỐNG...</bold></yellow>", List.of("<gray>Đang cuộn vòng quay...")));
         } else {
             String streakText = streakCount > 0 ? " <gold>🔥 Chuỗi quay hiện tại: " + streakCount + "/10 ván</gold>" : "";
+            String modeStr = switch (paymentMode) {
+                case VAULT_MONEY -> "<green>Tiền Vault ($)</green>";
+                case STANDARD_TICKET -> "<yellow>Vé Quay Thường</yellow>";
+                case VIP_TICKET -> "<gold>Vé VIP Highroller</gold>";
+            };
+
             String spinText = "<gradient:gold:yellow><bold>🎰 BẤM QUAY CƯỢC " + ConfigManager.formatMoney(currentBetAmount) + "$</bold></gradient>";
             List<String> lore = List.of(
                     "",
+                    " <gray>Nguồn thanh toán: " + modeStr,
                     " <gray>Mức cược hiện tại: <gold>" + ConfigManager.formatMoney(currentBetAmount) + "$</gold>",
                     " <gray>Kết quả gần nhất: " + lastResultText,
                     streakText,
@@ -188,7 +295,7 @@ public class SoloSlotSession {
 
     public void updateAutoSpinItem() {
         if (isAutoSpinning) {
-            gui.setItem(43, buildItem(Material.REDSTONE_TORCH,
+            gui.setItem(42, buildItem(Material.REDSTONE_TORCH,
                     "<red><bold>⚡ TẮT QUAY TỰ ĐỘNG (AUTO)</bold></red>",
                     List.of(
                             "",
@@ -198,7 +305,7 @@ public class SoloSlotSession {
                             " <red>👉 CLICK ĐỂ DỪNG QUAY TỰ ĐỘNG!"
                     )));
         } else {
-            gui.setItem(43, buildItem(Material.LEVER,
+            gui.setItem(42, buildItem(Material.LEVER,
                     "<gradient:gold:yellow><bold>⚡ BẬT QUAY TỰ ĐỘNG (AUTO)</bold></gradient>",
                     List.of(
                             "",
@@ -211,7 +318,7 @@ public class SoloSlotSession {
     }
 
     public void updateHistoryButtonItem() {
-        gui.setItem(42, buildItem(Material.BOOK,
+        gui.setItem(40, buildItem(Material.BOOK,
                 "<gradient:gold:yellow><bold>📜 LỊCH SỬ CƯỢC CÁ NHÂN</bold></gradient>",
                 List.of(
                         "",
@@ -230,21 +337,22 @@ public class SoloSlotSession {
         } else {
             isAutoSpinning = true;
             updateAutoSpinItem();
-            player.sendMessage(mm.deserialize("<green>⚡ Đã bật chế độ Quay Tự Động (Auto Spin)! Hàng 1.5s tự quay 1 lượt.</green>"));
-            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.5f);
+            player.sendMessage(mm.deserialize("<green>⚡ Đã KÍCH HOẠT chế độ Quay Tự Động (Auto Spin)!</green>"));
+            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.5f);
 
             autoSpinTask = new BukkitRunnable() {
                 @Override
                 public void run() {
-                    if (!isAutoSpinning || !player.isOnline()) {
+                    if (!player.isOnline() || !isAutoSpinning) {
                         cancel();
+                        isAutoSpinning = false;
                         return;
                     }
                     if (!isSpinning) {
                         executeSpin();
                     }
                 }
-            }.runTaskTimer(plugin, 10L, 35L); // Mỗi 1.75s tự bấm quay 1 ván
+            }.runTaskTimer(plugin, 10L, 30L); // 1.5s mỗi lượt quay
         }
     }
 
@@ -275,45 +383,39 @@ public class SoloSlotSession {
     }
 
     public void updatePlayerStatsItem() {
-        Economy economy = plugin.getEconomy();
-        double balance = economy != null ? economy.getBalance(player) : 0;
+        int wins = databaseManager != null ? databaseManager.getWins(player.getUniqueId()) : 0;
+        int total = databaseManager != null ? databaseManager.getTotalSpins(player.getUniqueId()) : 0;
+        double winRate = total > 0 ? ((double) wins / total) * 100.0 : 0.0;
 
-        ItemStack statsItem = buildItem(Material.COMPASS,
-                "<gradient:#00AA00:#55FF55><bold>📈 THỐNG KÊ CÁ NHÂN: " + player.getName() + "</bold></gradient>",
+        gui.setItem(51, buildItem(Material.COMPASS,
+                "<gradient:gold:yellow><bold>📈 THỐNG KÊ MAY MẮN</bold></gradient>",
                 List.of(
                         "",
-                        " <gray>Số dư hiện tại: <gold>" + ConfigManager.formatMoney(balance) + "$</gold>",
-                        " <gray>Mức cược đang chọn: <gold>" + ConfigManager.formatMoney(currentBetAmount) + "$</gold>",
-                        " <gray>Lần quay trước: " + lastResultText,
+                        " <gray>Tổng số lượt quay: <gold>" + total + "</gold>",
+                        " <gray>Số lượt thắng: <green>" + wins + "</green>",
+                        " <gray>Tỷ lệ may mắn: <yellow>" + String.format("%.1f", winRate) + "%</yellow>",
                         "",
-                        " <yellow>👉 CLICK ĐỂ XEM THỐNG KÊ MAY MẮN!"
-                ));
-        gui.setItem(51, statsItem);
+                        " <yellow>👉 CLICK ĐỂ XEM CHI TIẾT THỐNG KÊ!"
+                )));
     }
 
     public void updateJackpotPoolItem() {
-        double pool = jackpotManager.getJackpotPool();
-        boolean isHappyHour = configManager.isHappyHourActive();
-        String happyHourText = isHappyHour ? " <gradient:#FF0000:#FFD700>🎆 GIỜ VÀNG (20H-21H): TĂNG TỶ LỆ NỔ HŨ X2!</gradient>" : "";
-
-        ItemStack jackpotItem = buildItem(Material.NETHERITE_BLOCK,
-                "<gradient:#FF0000:#FFD700><bold>🔥 QUỸ JACKPOT TÍCH LŨY SERVER 🔥</bold></gradient>",
+        double currentPool = jackpotManager.getJackpotPool();
+        gui.setItem(4, buildItem(Material.NETHERITE_BLOCK,
+                "<gradient:#8B0000:#D2143A><bold>🔥 QUỸ JACKPOT TÍCH LŨY SERVER 🔥</bold></gradient>",
                 List.of(
                         "",
-                        " <yellow>Tổng Quỹ Jackpot hiện tại: <gold><bold>" + ConfigManager.formatMoney(pool) + "$</bold></gold>",
-                        " <gray>Tất cả tiền thua cược của server",
-                        " <gray>đều được tích lũy 100% thẳng vào Quỹ Jackpot!",
-                        happyHourText,
+                        " <gray>Tổng tiền thưởng Quỹ Hũ hiện tại:",
+                        " <gold><bold>" + ConfigManager.formatMoney(currentPool) + "$</bold></gold>",
                         "",
-                        " <gradient:#FF0000:#FFD700>🔥 3x Netherite (NTR) = THƯỞNG X5 + HỐT SẠCH QUỸ JACKPOT!</gradient>"
-                ));
-        gui.setItem(4, jackpotItem);
+                        " <yellow>Tỷ lệ Nổ Hũ Hốt Sạch Hũ: <red><bold>3x NETHERITE (NTR)</bold></red>"
+                )));
     }
 
     public void updateDailyFreeSpinItem() {
         long lastClaim = databaseManager != null ? databaseManager.getLastFreeSpinTime(player.getUniqueId()) : 0L;
         long now = System.currentTimeMillis();
-        long cooldownMs = 24 * 3600 * 1000L; // 24 giờ
+        long cooldownMs = 24 * 3600 * 1000L;
         long remaining = (lastClaim + cooldownMs) - now;
 
         if (remaining <= 0) {
@@ -416,12 +518,22 @@ public class SoloSlotSession {
         updateDailyFreeSpinItem();
         updateAutoSpinItem();
         updateHistoryButtonItem();
+        updatePaymentModeItem();
         updateTicketItem();
         updateVipTicketItem();
+        updateBetButtons();
+        updateSpinButton();
     }
 
     public void setBetAmount(double amount) {
         if (isSpinning) return;
+
+        if (amount >= 500000.0 && paymentMode == PaymentMode.STANDARD_TICKET) {
+            player.sendMessage(mm.deserialize("<red>❌ Mức cược 500,000$ đã bị khóa khi chọn chế độ Vé Quay Thường! Vui lòng chọn mức cược từ 1k$ - 100k$.</red>"));
+            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 0.8f);
+            return;
+        }
+
         this.currentBetAmount = amount;
         player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.8f, 1.2f);
         player.sendMessage(mm.deserialize("<green>✅ Đã chọn mức cược: <gold>" + ConfigManager.formatMoney(amount) + "$</gold>"));
@@ -432,43 +544,62 @@ public class SoloSlotSession {
     public void executeSpin() {
         if (isSpinning) return;
 
-        int availableStandardTickets = databaseManager != null ? databaseManager.getTickets(player.getUniqueId()) : 0;
-        int availableVipTickets = databaseManager != null ? databaseManager.getVipTickets(player.getUniqueId()) : 0;
         boolean isUsingTicket = false;
+        DatabaseManager db = databaseManager;
 
-        if (currentBetAmount >= 500000.0) {
-            // Mức cược 500k -> Cần Vé VIP Highroller!
-            if (availableVipTickets > 0) {
-                boolean deducted = databaseManager.removeVipTickets(player.getUniqueId(), 1);
-                if (deducted) {
-                    isUsingTicket = true;
-                    int remaining = availableVipTickets - 1;
-                    player.sendMessage(mm.deserialize(
-                            "<gradient:#FF0000:#FFD700><bold>🎫 [VÉ VIP HIGHROLLER]</bold></gradient> <green>Đã dùng 1x Vé VIP Highroller cho lượt cược Tối Đa <gold><bold>500,000$</bold></gold>! (Còn lại: <gold><bold>" + remaining + " vé VIP</bold></gold>)</green>"
-                    ));
-                }
-            } else if (availableStandardTickets > 0) {
-                player.sendMessage(mm.deserialize(
-                        "<red>⚠️ Vé Quay Thường chỉ áp dụng cho cược 1k, 10k, 100k! Cược 500,000$ cần Vé VIP Highroller (CMD 888) hoặc tiền Vault.</red>"
-                ));
+        if (paymentMode == PaymentMode.STANDARD_TICKET) {
+            if (currentBetAmount > 100000.0) {
+                player.sendMessage(mm.deserialize("<red>❌ Vé Quay Thường chỉ áp dụng cho mức cược từ 1k$ đến 100k$! Mức cược 500k$ đã bị khóa.</red>"));
+                player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 0.8f);
+                stopAutoSpin();
+                return;
             }
+
+            int availableTickets = db != null ? db.getTickets(player.getUniqueId()) : 0;
+            if (availableTickets <= 0) {
+                player.sendMessage(mm.deserialize("<red>❌ Bạn đã hết Vé Quay Thường! Vui lòng nạp thêm vé hoặc chuyển sang dùng Tiền Vault ($).</red>"));
+                player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 0.8f);
+                stopAutoSpin();
+                return;
+            }
+
+            boolean deducted = db.removeTickets(player.getUniqueId(), 1);
+            if (!deducted) {
+                player.sendMessage(mm.deserialize("<red>❌ Giao dịch trừ vé thất bại!</red>"));
+                stopAutoSpin();
+                return;
+            }
+
+            isUsingTicket = true;
+            int remaining = availableTickets - 1;
+            player.sendMessage(mm.deserialize(
+                    "<gradient:#FFD700:#FFA500><bold>🎟️ [VÉ QUAY THƯỜNG]</bold></gradient> <green>Đã dùng 1x Vé Quay Thường cho mức cược <gold><bold>" + ConfigManager.formatMoney(currentBetAmount) + "$</bold></gold>! (Còn lại: <gold><bold>" + remaining + " vé</bold></gold>)</green>"
+            ));
+        } else if (paymentMode == PaymentMode.VIP_TICKET) {
+            currentBetAmount = 500000.0;
+
+            int availableVip = db != null ? db.getVipTickets(player.getUniqueId()) : 0;
+            if (availableVip <= 0) {
+                player.sendMessage(mm.deserialize("<red>❌ Bạn đã hết Vé VIP Highroller! Vui lòng nạp thêm vé VIP hoặc chuyển sang dùng Tiền Vault ($).</red>"));
+                player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 0.8f);
+                stopAutoSpin();
+                return;
+            }
+
+            boolean deducted = db.removeVipTickets(player.getUniqueId(), 1);
+            if (!deducted) {
+                player.sendMessage(mm.deserialize("<red>❌ Giao dịch trừ vé VIP thất bại!</red>"));
+                stopAutoSpin();
+                return;
+            }
+
+            isUsingTicket = true;
+            int remaining = availableVip - 1;
+            player.sendMessage(mm.deserialize(
+                    "<gradient:#FF0000:#FFD700><bold>🎫 [VÉ VIP HIGHROLLER]</bold></gradient> <green>Đã dùng 1x Vé VIP Highroller cho mức cược Tối Đa <gold><bold>500,000$</bold></gold>! (Còn lại: <gold><bold>" + remaining + " vé VIP</bold></gold>)</green>"
+            ));
         } else {
-            // Mức cược 1k, 10k, 100k -> Dùng Vé Quay Thường!
-            if (availableStandardTickets > 0) {
-                boolean deducted = databaseManager.removeTickets(player.getUniqueId(), 1);
-                if (deducted) {
-                    isUsingTicket = true;
-                    int remaining = availableStandardTickets - 1;
-                    player.sendMessage(mm.deserialize(
-                            "<gradient:#FFD700:#FFA500><bold>🎟️ [VÉ QUAY CASINO]</bold></gradient> <green>Đã dùng 1x Vé Quay Thường cho mức cược <gold><bold>" + ConfigManager.formatMoney(currentBetAmount) + "$</bold></gold>! (Còn lại: <gold><bold>" + remaining + " vé</bold></gold>)</green>"
-                    ));
-                }
-            }
-        }
-
-        this.isUsingTicket = isUsingTicket;
-
-        if (!isUsingTicket) {
+            // Thanh toán bằng tiền mặt Vault ($)
             Economy economy = plugin.getEconomy();
             if (economy == null || !economy.has(player, currentBetAmount)) {
                 player.sendMessage(configManager.getNotEnoughMoneyMsg(currentBetAmount));
@@ -485,16 +616,21 @@ public class SoloSlotSession {
             }
         }
 
+        this.isUsingTicket = isUsingTicket;
+
         // Tăng chuỗi quay
         streakCount++;
         if (streakCount >= 10) {
-            player.sendMessage(mm.deserialize("<gradient:gold:yellow><bold>🎡 CHUỖI QUAY 10 VÁN!</bold></gradient> <green>Lượt quay này nhận <gold><bold>LUCKY SPIN X2 TỶ LỆ THẮNG</bold></gold>!</green>"));
+            player.sendMessage(mm.deserialize("<gradient:gold:yellow><bold>🎡 CHUỖI QUAY 10 VÁN!</bold></gradient> <green>Lượt quay này nhận <gold><bold>LUCKY SPIN X1.5 TỶ LỆ THẮNG</bold></gold>!</green>"));
             player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.5f);
         }
 
         isSpinning = true;
         updateSpinButton();
         updateTicketItem();
+        updateVipTicketItem();
+        updatePaymentModeItem();
+        updateBetButtons();
         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.5f);
 
         runVerticalSlidingReelAnimation();
@@ -509,214 +645,179 @@ public class SoloSlotSession {
         ThreadLocalRandom rand = ThreadLocalRandom.current();
         double roll = rand.nextDouble(100.0);
 
-        final boolean isWin;
-        final boolean isJackpot;
-        final Material m1, m2, m3;
-        Material jackpotMat = Material.NETHERITE_BLOCK;
+        boolean happyHour = plugin.getHappyHourManager() != null && plugin.getHappyHourManager().isHappyHour();
+        double winChance = happyHour ? configManager.getWinRateHappyHour() : configManager.getWinRateNormal(); // 29.3%
+        double jackpotChance = configManager.getJackpotRate(); // 0.50%
 
-        boolean isHappyHour = configManager.isHappyHourActive();
-        boolean isLuckyStreak = streakCount >= 10;
-        if (isLuckyStreak) streakCount = 0; // Reset sau khi dùng
-
-        double jackpotChance = configManager.getJackpotRate(); // 0.50% Nổ Hũ
-        double winChance = isHappyHour ? configManager.getWinRateHappyHour() : configManager.getWinRateNormal(); // 29.3% Thắng Thường
-        if (isLuckyStreak) winChance = Math.min(85.0, winChance * 1.5);
-
-        if (forceNextJackpot) {
-            isWin = true; isJackpot = true;
-            m1 = jackpotMat; m2 = jackpotMat; m3 = jackpotMat;
-            forceNextJackpot = false;
-        } else if (roll < jackpotChance) {
-            // Jackpot Nổ Hũ
-            isWin = true; isJackpot = true;
-            m1 = jackpotMat; m2 = jackpotMat; m3 = jackpotMat;
-        } else if (roll < winChance) {
-            // Thắng Thường (x2.0 tiền cược)
-            isWin = true; isJackpot = false;
-            Material winMat;
-            do {
-                winMat = SYMBOLS[rand.nextInt(SYMBOLS.length)];
-            } while (winMat == jackpotMat);
-            m1 = winMat; m2 = winMat; m3 = winMat;
-        } else {
-            // THUA CƯỢC (Tích lũy 100% tiền thua vào Quỹ Hũ Server!)
-            isWin = false; isJackpot = false;
-            Material mat1 = SYMBOLS[rand.nextInt(SYMBOLS.length)];
-            Material mat2 = SYMBOLS[rand.nextInt(SYMBOLS.length)];
-            Material mat3 = SYMBOLS[rand.nextInt(SYMBOLS.length)];
-            while (mat1 == mat2 && mat2 == mat3) {
-                mat3 = SYMBOLS[rand.nextInt(SYMBOLS.length)];
-            }
-            m1 = mat1; m2 = mat2; m3 = mat3;
+        if (streakCount >= 10) {
+            winChance = Math.min(85.0, winChance * 1.5);
         }
 
-        new BukkitRunnable() {
-            private int step = 0;
-            private final Material[] reel1 = new Material[3];
-            private final Material[] reel2 = new Material[3];
-            private final Material[] reel3 = new Material[3];
+        boolean willWin = (roll < winChance) || forceNextJackpot;
+        boolean isJackpotWin = false;
 
-            {
-                for (int i = 0; i < 3; i++) {
-                    reel1[i] = SYMBOLS[rand.nextInt(SYMBOLS.length)];
-                    reel2[i] = SYMBOLS[rand.nextInt(SYMBOLS.length)];
-                    reel3[i] = SYMBOLS[rand.nextInt(SYMBOLS.length)];
+        if (willWin) {
+            if (forceNextJackpot) {
+                isJackpotWin = true;
+                forceNextJackpot = false;
+            } else {
+                double jRoll = rand.nextDouble(100.0);
+                if (jRoll < jackpotChance) {
+                    isJackpotWin = true;
                 }
             }
+        }
+
+        Material finalMiddleSymbol;
+        Material[] finalReelMiddle = new Material[3];
+
+        if (willWin) {
+            if (isJackpotWin) {
+                finalMiddleSymbol = Material.NETHERITE_BLOCK;
+            } else {
+                Material[] normalSymbols = {
+                        Material.COAL_BLOCK, Material.IRON_BLOCK, Material.GOLD_BLOCK,
+                        Material.REDSTONE_BLOCK, Material.LAPIS_BLOCK, Material.EMERALD_BLOCK, Material.DIAMOND_BLOCK
+                };
+                finalMiddleSymbol = normalSymbols[rand.nextInt(normalSymbols.length)];
+            }
+            finalReelMiddle[0] = finalMiddleSymbol;
+            finalReelMiddle[1] = finalMiddleSymbol;
+            finalReelMiddle[2] = finalMiddleSymbol;
+        } else {
+            // Lượt THUA: 3 ô hàng ngang trung tâm (Slots 21, 22, 23) ĐẢM BẢO KHÔNG THỂ KHỚP CẢ 3 Ô!
+            finalMiddleSymbol = Material.COAL_BLOCK;
+            finalReelMiddle[0] = SYMBOLS[rand.nextInt(SYMBOLS.length)];
+            finalReelMiddle[1] = SYMBOLS[rand.nextInt(SYMBOLS.length)];
+            do {
+                finalReelMiddle[2] = SYMBOLS[rand.nextInt(SYMBOLS.length)];
+            } while (finalReelMiddle[2] == finalReelMiddle[1] && finalReelMiddle[1] == finalReelMiddle[0]);
+        }
+
+        int[] reel1 = {12, 21, 30};
+        int[] reel2 = {13, 22, 31};
+        int[] reel3 = {14, 23, 32};
+
+        final boolean finalWin = willWin;
+        final boolean finalJackpot = isJackpotWin;
+
+        new BukkitRunnable() {
+            int ticks = 0;
+            final int maxTicks = 20;
 
             @Override
             public void run() {
-                step++;
+                ticks++;
 
-                // Cuộn dọc Cột 1 (Dừng ở step 18)
-                if (step <= 18) {
-                    Material top = (step == 17) ? m1 : SYMBOLS[rand.nextInt(SYMBOLS.length)];
-                    reel1[2] = reel1[1]; reel1[1] = reel1[0]; reel1[0] = top;
+                if (ticks < 10) {
+                    shiftReelDown(reel1, rand);
+                } else if (ticks == 10) {
+                    setReelFinal(reel1, finalReelMiddle[0], rand);
+                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.2f);
                 }
 
-                // Cuộn dọc Cột 2 (Dừng ở step 25)
-                if (step <= 25) {
-                    Material top = (step == 24) ? m2 : SYMBOLS[rand.nextInt(SYMBOLS.length)];
-                    reel2[2] = reel2[1]; reel2[1] = reel2[0]; reel2[0] = top;
+                if (ticks < 14) {
+                    shiftReelDown(reel2, rand);
+                } else if (ticks == 14) {
+                    setReelFinal(reel2, finalReelMiddle[1], rand);
+                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.4f);
                 }
 
-                // Cuộn dọc Cột 3 (Dừng ở step 32)
-                if (step <= 32) {
-                    Material top = (step == 31) ? m3 : SYMBOLS[rand.nextInt(SYMBOLS.length)];
-                    reel3[2] = reel3[1]; reel3[1] = reel3[0]; reel3[0] = top;
+                if (ticks < 18) {
+                    shiftReelDown(reel3, rand);
+                } else if (ticks == 18) {
+                    setReelFinal(reel3, finalReelMiddle[2], rand);
+                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.6f);
                 }
 
-                // Hiển thị hiệu ứng trượt dọc Top (12,13,14) -> Middle (21,22,23) -> Bottom (30,31,32)
-                gui.setItem(12, buildSymbolItemStatic(reel1[0], mm));
-                gui.setItem(21, buildSymbolItemStatic(reel1[1], mm));
-                gui.setItem(30, buildSymbolItemStatic(reel1[2], mm));
-
-                gui.setItem(13, buildSymbolItemStatic(reel2[0], mm));
-                gui.setItem(22, buildSymbolItemStatic(reel2[1], mm));
-                gui.setItem(31, buildSymbolItemStatic(reel2[2], mm));
-
-                gui.setItem(14, buildSymbolItemStatic(reel3[0], mm));
-                gui.setItem(23, buildSymbolItemStatic(reel3[1], mm));
-                gui.setItem(32, buildSymbolItemStatic(reel3[2], mm));
-
-                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_HAT, 0.7f, 1.4f);
-
-                if (step >= 32) {
+                if (ticks >= maxTicks) {
                     cancel();
-                    String symName = formatSymbolNameStatic(m1);
-                    onGameComplete(isWin, isJackpot, m1, "3x " + symName);
+                    handleSpinResult(finalWin, finalJackpot, finalMiddleSymbol);
                 }
             }
-        }.runTaskTimer(plugin, 0L, 2L);
+        }.runTaskTimer(plugin, 1L, 2L);
     }
 
-    /**
-     * XỬ LÝ HOÀN TẤT VÀ HIỂN THỊ THÔNG BÁO THẮNG / THUA TRỰC TIẾP LÊN CHAT
-     */
-    private void onGameComplete(boolean isWin, boolean isJackpot, Material winningMat, String detailText) {
-        Economy economy = plugin.getEconomy();
-        double taxRate = configManager.getTaxRate();
+    private void shiftReelDown(int[] reelSlots, ThreadLocalRandom rand) {
+        gui.setItem(reelSlots[2], gui.getItem(reelSlots[1]));
+        gui.setItem(reelSlots[1], gui.getItem(reelSlots[0]));
+
+        Material newTopMat = SYMBOLS[rand.nextInt(SYMBOLS.length)];
+        gui.setItem(reelSlots[0], buildSymbolItemStatic(newTopMat, mm));
+        player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.3f, 1.8f);
+    }
+
+    private void setReelFinal(int[] reelSlots, Material middleSymbol, ThreadLocalRandom rand) {
+        gui.setItem(reelSlots[1], buildSymbolItemStatic(middleSymbol, mm));
+        gui.setItem(reelSlots[0], buildSymbolItemStatic(SYMBOLS[rand.nextInt(SYMBOLS.length)], mm));
+        gui.setItem(reelSlots[2], buildSymbolItemStatic(SYMBOLS[rand.nextInt(SYMBOLS.length)], mm));
+    }
+
+    private void handleSpinResult(boolean isWin, boolean isJackpot, Material winningSymbol) {
+        String detailText = isWin ? formatSymbolNameStatic(winningSymbol) : "Thua";
 
         if (isWin) {
+            double multiplier = configManager.getSymbolMultiplier(winningSymbol);
+            double grossReward = currentBetAmount * multiplier;
+
             if (isJackpot) {
-                // JACKPOT NỔ HŨ: (Cược x 5.0) + Hốt 100% Quỹ Hũ Tích Lũy Server
-                double wonPool = jackpotManager.claimJackpotPool(player.getName());
-                double grossPayout = (currentBetAmount * 5.0) + wonPool;
-                double tax = grossPayout * taxRate;
-                double netPayout = grossPayout - tax;
+                double jackpotPoolWon = jackpotManager.getJackpotPool();
+                grossReward += jackpotPoolWon;
+                jackpotManager.resetJackpotPool();
+                jackpotManager.broadcastJackpotWin(player.getName(), grossReward);
+            }
 
-                if (economy != null && netPayout > 0) {
-                    economy.depositPlayer(player, netPayout);
-                }
+            double taxRate = configManager.getTaxRate(); // 0.10 (10%)
+            double taxAmount = grossReward * taxRate;
+            double netReward = grossReward - taxAmount;
 
-                // 🎆 BẮN PHÁO HOA & HIỆU ỨNG PARTICLE VÀNG KIM RỰC RỠ XUNG QUANH NGƯỜI CHƠI
+            plugin.getEconomy().depositPlayer(player, netReward);
+
+            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.4f);
+            if (isJackpot) {
                 spawnJackpotFireworksAndParticles(player);
-
-                lastResultText = "<gradient:#FF0000:#FFD700><bold>🔥 JACKPOT NỔ HŨ X5 + HŨ + " + ConfigManager.formatMoney(netPayout) + "$ 🔥</bold></gradient>";
-                player.sendMessage(configManager.getJackpotWinMsg(currentBetAmount, grossPayout, tax, netPayout));
-                player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
-                player.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 0.8f, 1.2f);
-
-                // Đổi nút Slot 49 thành Banner Nổ Hũ rực rỡ
-                gui.setItem(49, buildItem(Material.NETHERITE_BLOCK,
-                        "<gradient:#FF0000:#FFD700><bold>🔥 JACKPOT NỔ HŨ X5 HỐT TRỌN " + ConfigManager.formatMoney(netPayout) + "$ 🔥</bold></gradient>",
-                        List.of("<yellow>🎉 " + detailText + " - THẮNG LỚN! 🎉", "", "<yellow>👉 Click để quay tiếp lượt nữa!")));
-
-                // Đổi đèn Slot 20 & 24 thành màu xanh lá thắng lớn
-                gui.setItem(20, buildItem(Material.LIME_STAINED_GLASS_PANE, "<green><bold>★ JACKPOT ★</bold></green>", List.of()));
-                gui.setItem(24, buildItem(Material.LIME_STAINED_GLASS_PANE, "<green><bold>★ JACKPOT ★</bold></green>", List.of()));
-
-                // Thông báo toàn server
-                Component broadcastMsg = mm.deserialize(
-                        "\n<gradient:#FF0000:#FFD700><bold>🎉 JACKPOT NỔ HŨ X5! 🎉</bold></gradient>\n" +
-                                "<yellow>Chúc mừng người chơi <gold><bold>" + player.getName() + "</bold></gold> vừa nổ hũ <gradient:#FF0000:#FFD700><bold>3x KHỐI NETHERITE (NTR)</bold></gradient> lượt cược <gold>" + ConfigManager.formatMoney(currentBetAmount) + "$</gold> HỐT TRỌN QUỸ HŨ TÍCH LŨY + THƯỞNG X5 nhận <gold><bold>" + ConfigManager.formatMoney(netPayout) + "$</bold></gold>!</yellow>\n"
-                );
-                Bukkit.broadcast(broadcastMsg);
+                lastResultText = "<gradient:#FF0000:#FFD700><bold>NỔ HŨ HỐT SẠCH HŨ +" + ConfigManager.formatMoney(netReward) + "$!</bold></gradient>";
+                player.sendMessage(configManager.getJackpotWinMsg(currentBetAmount, grossReward, taxAmount, netReward));
             } else {
-                // THẮNG THƯỜNG: Tất cả khoáng sản đều x2.0 tiền cược
-                double multiplier = configManager.getNormalWinMultiplier();
-                double grossPayout = currentBetAmount * multiplier;
-                double tax = grossPayout * taxRate;
-                double netPayout = grossPayout - tax;
+                lastResultText = "<green><bold>THẮNG X2 +" + ConfigManager.formatMoney(netReward) + "$ (" + detailText + ")</bold></green>";
+                player.sendMessage(configManager.getWinMsg(detailText, multiplier, currentBetAmount, grossReward, taxAmount, netReward));
+            }
 
-                if (economy != null) {
-                    economy.depositPlayer(player, netPayout);
-                }
-
-                lastResultText = "<green><bold>🎉 THẮNG X2 +" + ConfigManager.formatMoney(netPayout) + "$</bold></green>";
-                player.sendMessage(configManager.getWinMsg(detailText, multiplier, currentBetAmount, grossPayout, tax, netPayout));
-                player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
-
-                // Đổi nút Slot 49 thành Banner Thắng Thưởng
-                gui.setItem(49, buildItem(Material.EMERALD_BLOCK,
-                        "<green><bold>🎉 BẠN ĐÃ THẮNG X2 +" + ConfigManager.formatMoney(netPayout) + "$ 🎉</bold></green>",
-                        List.of("<yellow>★ Kết quả: " + detailText + " (Thưởng x2.0)", "", "<yellow>👉 Click để quay tiếp lượt nữa!")));
-
-                // Đổi đèn Slot 20 & 24 thành màu xanh thắng
-                gui.setItem(20, buildItem(Material.LIME_STAINED_GLASS_PANE, "<green><bold>▶ THẮNG X2 ◀</bold></green>", List.of()));
-                gui.setItem(24, buildItem(Material.LIME_STAINED_GLASS_PANE, "<green><bold>▶ THẮNG X2 ◀</bold></green>", List.of()));
+            if (databaseManager != null) {
+                databaseManager.recordSpinAsync(
+                        player.getUniqueId(),
+                        player.getName(),
+                        currentBetAmount,
+                        true,
+                        netReward,
+                        isJackpot ? "JACKPOT NỔ HŨ X5" : "THẮNG " + String.format("%.1fx", multiplier) + " " + detailText
+                );
             }
         } else {
-            // Thua cược
             if (!isUsingTicket) {
+                // Thua bằng tiền mặt ($): NẠP 100% SỐ TIỀN THUA VÀO QUỸ JACKPOT SERVER!
                 jackpotManager.addLossToPool(currentBetAmount);
-                lastResultText = "<red><bold>✘ THUA -" + ConfigManager.formatMoney(currentBetAmount) + "$</bold></red>";
                 player.sendMessage(configManager.getLoseMsg(currentBetAmount));
             } else {
-                lastResultText = "<red><bold>✘ KHÔNG TRÚNG (ĐÃ DÙNG VÉ QUAY)</bold></red>";
+                // Thua bằng vé quay: 0$ tiền bị trừ, 0$ cộng hũ
                 player.sendMessage(mm.deserialize(
-                        "<red><bold>✘ KHÔNG TRÚNG!</bold></red> <gray>Lượt dùng Vé Quay Casino không may mắn. Cố gắng lượt tiếp theo nhé!</gray>"
+                        "<gray>🎰 Lượt quay dùng <gold>Vé Quay</gold> không trúng thưởng hàng ngang. (Không bị trừ tiền xu $!)</gray>"
                 ));
             }
-            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 0.8f);
 
-            // Đổi nút Slot 49 thành Banner Báo Thua rõ ràng
-            if (!isUsingTicket) {
-                gui.setItem(49, buildItem(Material.RED_STAINED_GLASS_PANE,
-                        "<red><bold>✘ KHÔNG TRÚNG (THUA -" + ConfigManager.formatMoney(currentBetAmount) + "$) ✘</bold></red>",
-                        List.of("<gray>Tiền thua đã tích lũy 100% vào Quỹ Hũ Server!", "", "<yellow>👉 Click để thử vận may lượt tiếp theo!")));
-            } else {
-                gui.setItem(49, buildItem(Material.RED_STAINED_GLASS_PANE,
-                        "<red><bold>✘ KHÔNG TRÚNG (ĐÃ DÙNG VÉ QUAY) ✘</bold></red>",
-                        List.of("<gray>Lượt quay bằng Vé Quay Casino không may mắn!", "", "<yellow>👉 Click để thử vận may lượt tiếp theo!")));
+            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.8f, 0.9f);
+            lastResultText = isUsingTicket ? "<red>THUA (Vé Quay)</red>" : "<red>THUA (-" + ConfigManager.formatMoney(currentBetAmount) + "$)</red>";
+
+            if (databaseManager != null) {
+                databaseManager.recordSpinAsync(
+                        player.getUniqueId(),
+                        player.getName(),
+                        currentBetAmount,
+                        false,
+                        0,
+                        isUsingTicket ? "THUA (Vé Quay)" : "THUA (Đã nạp 100% vào Hũ)"
+                );
             }
-
-            // Đổi đèn Slot 20 & 24 thành màu đỏ
-            gui.setItem(20, buildItem(Material.RED_STAINED_GLASS_PANE, "<red><bold>▶ KHÔNG TRÚNG ◀</bold></red>", List.of()));
-            gui.setItem(24, buildItem(Material.RED_STAINED_GLASS_PANE, "<red><bold>▶ KHÔNG TRÚNG ◀</bold></red>", List.of()));
-        }
-
-        // Ghi lịch sử CSDL SQLite
-        if (databaseManager != null) {
-            databaseManager.recordSpinAsync(
-                    gameMode.getId(),
-                    player.getUniqueId(),
-                    player.getName(),
-                    isUsingTicket ? 0 : currentBetAmount,
-                    isWin,
-                    isWin ? (isJackpot ? currentBetAmount * 5.0 : currentBetAmount * 2.0) : 0,
-                    isJackpot ? "JACKPOT NỔ HŨ X5" : (isWin ? "THẮNG X2 " + detailText : (isUsingTicket ? "THUA (Vé Quay)" : "THUA (Đã cộng vào Hũ)"))
-            );
         }
 
         isUsingTicket = false;
@@ -724,14 +825,10 @@ public class SoloSlotSession {
         updateJackpotHUD();
     }
 
-    /**
-     * BẮN PHÁO HOA VÀ HIỆU ỨNG PARTICLE VÀNG KIM KHI NỔ HŨ
-     */
     private void spawnJackpotFireworksAndParticles(Player p) {
         Location loc = p.getLocation();
         World world = p.getWorld();
 
-        // 1. Pháo hoa
         for (int i = 0; i < 3; i++) {
             Location fwLoc = loc.clone().add((i - 1) * 1.5, 1.0, (i % 2 == 0 ? 1 : -1) * 1.5);
             Firework fw = (Firework) world.spawnEntity(fwLoc, EntityType.FIREWORK_ROCKET);
@@ -747,14 +844,11 @@ public class SoloSlotSession {
             fw.setFireworkMeta(meta);
         }
 
-        // 2. Vòng tròn particle vàng kim
-        for (int degree = 0; degree < 360; degree += 15) {
-            double radians = Math.toRadians(degree);
-            double x = Math.cos(radians) * 2.0;
-            double z = Math.sin(radians) * 2.0;
-            Location particleLoc = loc.clone().add(x, 1.0, z);
-            world.spawnParticle(Particle.TOTEM_OF_UNDYING, particleLoc, 5, 0.1, 0.1, 0.1, 0.1);
-            world.spawnParticle(Particle.END_ROD, particleLoc, 2, 0.05, 0.05, 0.05, 0.02);
+        for (int i = 0; i < 50; i++) {
+            double offsetX = (ThreadLocalRandom.current().nextDouble() - 0.5) * 2.5;
+            double offsetY = ThreadLocalRandom.current().nextDouble() * 2.0;
+            double offsetZ = (ThreadLocalRandom.current().nextDouble() - 0.5) * 2.5;
+            world.spawnParticle(Particle.TOTEM_OF_UNDYING, loc.clone().add(offsetX, offsetY, offsetZ), 3, 0.1, 0.1, 0.1, 0.05);
         }
     }
 
@@ -803,5 +897,6 @@ public class SoloSlotSession {
     public Inventory getGui() { return gui; }
     public String getGuiTitlePlain() { return guiTitlePlain; }
     public boolean isSpinning() { return isSpinning; }
+    public PaymentMode getPaymentMode() { return paymentMode; }
     public void setForceNextJackpot(boolean force) { this.forceNextJackpot = force; }
 }
