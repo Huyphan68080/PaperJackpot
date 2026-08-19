@@ -139,18 +139,18 @@ public class MenuListener implements Listener {
                 int slot = event.getSlot();
 
                 switch (slot) {
-                    case 40 -> new PersonalHistoryGui(plugin).open(player); // 📜 LỊCH SỬ CƯỢC CÁ NHÂN
-                    case 42 -> session.toggleAutoSpin();                     // ⚡ BẬT / TẮT QUAY TỰ ĐỘNG (AUTO)
-                    case 43 -> session.cyclePaymentMode();                   // 💳 CHỌN CHẾ ĐỘ THANH TOÁN (TIỀN VAULT / VÉ THƯỜNG / VÉ VIP)
+                    case 36 -> new PersonalHistoryGui(plugin).open(player); // 📜 LỊCH SỬ CƯỢC CÁ NHÂN
+                    case 38 -> session.cyclePaymentMode();                   // 💳 CHỌN CHẾ ĐỘ THANH TOÁN (TIỀN VAULT / VÉ THƯỜNG / VÉ VIP)
+                    case 40 -> session.toggleAutoSpin();                     // ⚡ BẬT / TẮT QUAY TỰ ĐỘNG (AUTO)
+                    case 41 -> new LeaderboardGui(plugin).open(player);       // 🏆 TOP 10 BẢNG XẾP HẠNG
+                    case 42 -> new PlayerStatsGui(plugin).open(player);        // 📈 THỐNG KÊ CÁ NHÂN
+                    case 43 -> session.claimDailyFreeSpin();                   // 🎁 QUAY MIỄN PHÍ HẰNG NGÀY
+                    case 44 -> player.closeInventory();                        // 🚪 THOÁT GAME
                     case 45 -> session.setBetAmount(1000);
                     case 46 -> session.setBetAmount(10000);
                     case 47 -> session.setBetAmount(100000);
                     case 48 -> session.setBetAmount(500000);
-                    case 49 -> session.executeSpin();                        // BẤM QUAY CƯỢC NGAY TỨC THÌ
-                    case 50 -> new LeaderboardGui(plugin).open(player);       // 🏆 TOP 10 BẢNG XẾP HẠNG
-                    case 51 -> new PlayerStatsGui(plugin).open(player);        // 📈 THỐNG KÊ CÁ NHÂN
-                    case 52 -> session.claimDailyFreeSpin();                   // 🎁 QUAY MIỄN PHÍ HẰNG NGÀY
-                    case 53 -> player.closeInventory();                        // 🚪 THOÁT GAME
+                    case 49 -> session.executeSpin();                        // 🎰 BẤM QUAY CƯỢC NGAY TỨC THÌ
                 }
             }
             return;

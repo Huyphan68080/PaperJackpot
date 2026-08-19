@@ -26,10 +26,9 @@ import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * SoloSlotSession - Quản lý phiên chơi Quay Hũ Nổ Hũ 3x3 Cá Nhân (Single Player Instance).
- * Hỗ trợ 3 Chế Độ Nguồn Tiền: TIỀN VAULT ($), VÉ QUAY THƯỜNG (1K-100K), VÉ VIP HIGHROLLER (500K$).
- * Tỷ lệ: 29.3% Thắng Thường, 0.50% Nổ Hũ Jackpot cố định.
- * Khi dùng tiền Vault ($): Nạp 100% tiền thua vào Quỹ Jackpot Server!
- * Khi dùng Vé Quay Thường: Khóa hoàn toàn ô cược 500k$ (Barrier red lock).
+ * Layout GUI mới cực kỳ cân đối & đẹp mắt:
+ * Row 5 (Slots 36-44): Lịch Sử | Ví Vé Thường | CHỌN NGUỒN TIỀN | Ví Vé VIP | Auto Spin | Top 10 | Thống Kê | Quà Ngày | Thoát
+ * Row 6 (Slots 45-53): 1k | 10k | 100k | 500k (Barrier nếu Vé Thường) | BẤM QUAY (Nether Star) | Khung Viền Đen
  */
 public class SoloSlotSession {
 
@@ -114,17 +113,18 @@ public class SoloSlotSession {
     }
 
     public void setupGuiFrame() {
-        // Viền khung đen hàng trên và hàng dưới
+        // Viền khung đen hàng 1 và viền ô trống hàng 6
         for (int i = 0; i < 9; i++) {
             gui.setItem(i, createDecorPane(Material.BLACK_STAINED_GLASS_PANE));
-            gui.setItem(45 + i, createDecorPane(Material.BLACK_STAINED_GLASS_PANE));
+        }
+        for (int i = 50; i <= 53; i++) {
+            gui.setItem(i, createDecorPane(Material.BLACK_STAINED_GLASS_PANE));
         }
 
         int[] sideSlots = {
                 9, 10, 11, 15, 16, 17,
                 18, 19, 25, 26,
-                27, 28, 29, 33, 34, 35,
-                36, 37, 38, 39
+                27, 28, 29, 33, 34, 35
         };
         for (int slot : sideSlots) {
             gui.setItem(slot, createDecorPane(Material.GRAY_STAINED_GLASS_PANE));
@@ -145,37 +145,26 @@ public class SoloSlotSession {
             gui.setItem(s, buildSymbolItemStatic(randomMat, mm));
         }
 
-        // HÀNG NÚT CHỨC NĂNG CONTROL BAR (Slots 40-44)
-        // Slot 40: 📜 LỊCH SỬ CƯỢC CÁ NHÂN
-        updateHistoryButtonItem();
+        // HÀNG 5 (SLOTS 36 - 44): THANH CHỨC NĂNG CONTROL BAR TỔNG HỢP CÂN ĐỐI
+        updateHistoryButtonItem();    // Slot 36: Lịch Sử
+        updateTicketItem();           // Slot 37: Ví Vé Thường
+        updatePaymentModeItem();      // Slot 38: CHỌN NGUỒN TIỀN (Trung tâm)
+        updateVipTicketItem();        // Slot 39: Ví Vé VIP
+        updateAutoSpinItem();         // Slot 40: Auto Spin
+        updatePlayerPersonalItem();   // Slot 41: Top 10
+        updatePlayerStatsItem();      // Slot 42: Thống Kê
+        updateDailyFreeSpinItem();    // Slot 43: Quà Ngày
+        gui.setItem(44, buildItem(Material.REDSTONE_BLOCK, "<red><bold>🚪 THOÁT GAME</bold></red>", List.of("<gray>Đóng giao diện quay hũ"))); // Slot 44: Thoát
 
-        // Slot 41: 🎫 VÍ VÉ VIP HIGHROLLER
-        updateVipTicketItem();
-
-        // Slot 42: ⚡ AUTO SPIN
-        updateAutoSpinItem();
-
-        // Slot 43: 💳 NÚT CHỌN CHẾ ĐỘ NGUỒN TIỀN (Tiền Vault $ / Vé Thường / Vé VIP)
-        updatePaymentModeItem();
-
-        // Slot 44: 🎟️ VÍ VÉ THƯỜNG
-        updateTicketItem();
-
-        // HÀNG NÚT THAO TÁC CƯỢC & QUAY (Slots 45-53)
+        // HÀNG 6 (SLOTS 45 - 49): CƯỢC & QUAY
         updateBetButtons();
         updateSpinButton();
-        updatePlayerPersonalItem();
-        updatePlayerStatsItem();
-        updateDailyFreeSpinItem();
-
-        // Slot 53: Nút Thoát Game
-        gui.setItem(53, buildItem(Material.REDSTONE_BLOCK, "<red><bold>🚪 THOÁT RA GAME</bold></red>", List.of("<gray>Đóng giao diện quay hũ")));
     }
 
     public void updatePaymentModeItem() {
         switch (paymentMode) {
             case VAULT_MONEY -> {
-                gui.setItem(43, buildItem(Material.EMERALD_BLOCK,
+                gui.setItem(38, buildItem(Material.EMERALD_BLOCK,
                         "<gradient:#00AA00:#55FF55><bold>💳 CHẾ ĐỘ: DÙNG TIỀN VAULT ($)</bold></gradient>",
                         List.of(
                                 "",
@@ -201,7 +190,7 @@ public class SoloSlotSession {
                     ).stream().map(mm::deserialize).toList());
                     item.setItemMeta(meta);
                 }
-                gui.setItem(43, item);
+                gui.setItem(38, item);
             }
             case VIP_TICKET -> {
                 int count = databaseManager != null ? databaseManager.getVipTickets(player.getUniqueId()) : 0;
@@ -219,7 +208,7 @@ public class SoloSlotSession {
                     ).stream().map(mm::deserialize).toList());
                     item.setItemMeta(meta);
                 }
-                gui.setItem(43, item);
+                gui.setItem(38, item);
             }
         }
     }
@@ -297,7 +286,7 @@ public class SoloSlotSession {
 
     public void updateAutoSpinItem() {
         if (isAutoSpinning) {
-            gui.setItem(42, buildItem(Material.REDSTONE_TORCH,
+            gui.setItem(40, buildItem(Material.REDSTONE_TORCH,
                     "<red><bold>⚡ TẮT QUAY TỰ ĐỘNG (AUTO)</bold></red>",
                     List.of(
                             "",
@@ -307,7 +296,7 @@ public class SoloSlotSession {
                             " <red>👉 CLICK ĐỂ DỪNG QUAY TỰ ĐỘNG!"
                     )));
         } else {
-            gui.setItem(42, buildItem(Material.LEVER,
+            gui.setItem(40, buildItem(Material.LEVER,
                     "<gradient:gold:yellow><bold>⚡ BẬT QUAY TỰ ĐỘNG (AUTO)</bold></gradient>",
                     List.of(
                             "",
@@ -320,7 +309,7 @@ public class SoloSlotSession {
     }
 
     public void updateHistoryButtonItem() {
-        gui.setItem(40, buildItem(Material.BOOK,
+        gui.setItem(36, buildItem(Material.BOOK,
                 "<gradient:gold:yellow><bold>📜 LỊCH SỬ CƯỢC CÁ NHÂN</bold></gradient>",
                 List.of(
                         "",
@@ -381,7 +370,7 @@ public class SoloSlotSession {
             skullMeta.setOwningPlayer(player);
             topItem.setItemMeta(skullMeta);
         }
-        gui.setItem(50, topItem);
+        gui.setItem(41, topItem);
     }
 
     public void updatePlayerStatsItem() {
@@ -389,7 +378,7 @@ public class SoloSlotSession {
         int total = databaseManager != null ? databaseManager.getTotalSpins(player.getUniqueId()) : 0;
         double winRate = total > 0 ? ((double) wins / total) * 100.0 : 0.0;
 
-        gui.setItem(51, buildItem(Material.COMPASS,
+        gui.setItem(42, buildItem(Material.COMPASS,
                 "<gradient:gold:yellow><bold>📈 THỐNG KÊ MAY MẮN</bold></gradient>",
                 List.of(
                         "",
@@ -421,7 +410,7 @@ public class SoloSlotSession {
         long remaining = (lastClaim + cooldownMs) - now;
 
         if (remaining <= 0) {
-            gui.setItem(52, buildItem(Material.CHEST,
+            gui.setItem(43, buildItem(Material.CHEST,
                     "<gradient:gold:yellow><bold>🎁 LƯỢT QUAY MIỄN PHÍ HẰNG NGÀY</bold></gradient>",
                     List.of(
                             "",
@@ -433,7 +422,7 @@ public class SoloSlotSession {
         } else {
             long hours = remaining / (3600 * 1000L);
             long minutes = (remaining % (3600 * 1000L)) / (60 * 1000L);
-            gui.setItem(52, buildItem(Material.CHEST_MINECART,
+            gui.setItem(43, buildItem(Material.CHEST_MINECART,
                     "<red><bold>🎁 ĐÃ ĐIỂM DANH HÔM NAY</bold></red>",
                     List.of(
                             "",
@@ -489,7 +478,7 @@ public class SoloSlotSession {
             meta.lore(rawLore.stream().map(mm::deserialize).toList());
             ticketItem.setItemMeta(meta);
         }
-        gui.setItem(44, ticketItem);
+        gui.setItem(37, ticketItem);
     }
 
     public void updateVipTicketItem() {
@@ -509,7 +498,7 @@ public class SoloSlotSession {
             meta.lore(rawLore.stream().map(mm::deserialize).toList());
             vipItem.setItemMeta(meta);
         }
-        gui.setItem(41, vipItem);
+        gui.setItem(39, vipItem);
     }
 
     public void updateJackpotHUD() {
