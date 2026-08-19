@@ -769,9 +769,9 @@ public class SoloSlotSession {
 
             if (isJackpot) {
                 spawnJackpotFireworksAndParticles(player);
-                player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
-                player.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_DEATH, 0.4f, 1.4f);
-                player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 0.8f);
+                player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.2f);
+                player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.5f);
+                player.playSound(player.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_LARGE_BLAST, 0.8f, 1.2f);
                 lastResultText = "<gradient:#FF0000:#FFD700><bold>NỔ HŨ HỐT SẠCH HŨ +" + ConfigManager.formatMoney(netReward) + "$!</bold></gradient>";
                 player.sendMessage(configManager.getJackpotWinMsg(currentBetAmount, grossReward, taxAmount, netReward));
             } else {
