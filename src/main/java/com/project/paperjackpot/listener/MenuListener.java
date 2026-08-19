@@ -157,7 +157,7 @@ public class MenuListener implements Listener {
         }
 
         // 2. Tương tác Bảng Xếp Hạng, Thống Kê, Lịch Sử GUI -> Khóa chặt tuyệt đối 100%
-        if (titlePlain.contains("CASINO") || titlePlain.contains("BẢNG XẾP HẠNG") || titlePlain.contains("THỐNG KÊ") || titlePlain.contains("LỊCH SỬ")) {
+        if (titlePlain.contains("CASINO") || titlePlain.contains("BẢNG XẾP HẠNG") || titlePlain.contains("THỐNG KÊ") || titlePlain.contains("LỊCH SỬ") || titlePlain.contains("TOP")) {
             event.setCancelled(true);
 
             ClickType click = event.getClick();
@@ -177,7 +177,7 @@ public class MenuListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryDrag(InventoryDragEvent event) {
         String titlePlain = PlainTextComponentSerializer.plainText().serialize(event.getView().title());
-        if (titlePlain.contains("CASINO") || titlePlain.contains("BẢNG XẾP HẠNG") || titlePlain.contains("THỐNG KÊ") || titlePlain.contains("LỊCH SỬ")) {
+        if (titlePlain.contains("CASINO") || titlePlain.contains("BẢNG XẾP HẠNG") || titlePlain.contains("THỐNG KÊ") || titlePlain.contains("LỊCH SỬ") || titlePlain.contains("TOP")) {
             event.setCancelled(true);
         }
     }

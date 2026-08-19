@@ -31,7 +31,7 @@ public class LeaderboardGui {
 
     public void open(Player player) {
         // Tiêu đề màu Đỏ Đô đậm nổi bật trên nền xám GUI container
-        Component title = mm.deserialize("<gradient:#8B0000:#D2143A><bold>🏆 TOP 10 THẦN TÀI TUẦN</bold></gradient>");
+        Component title = mm.deserialize("<gradient:#8B0000:#D2143A><bold>🏆 BẢNG XẾP HẠNG TOP 10 THẦN TÀI TUẦN</bold></gradient>");
         Inventory gui = Bukkit.createInventory(null, 27, title);
 
         // Viền kính xám
