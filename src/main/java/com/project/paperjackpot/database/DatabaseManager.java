@@ -328,12 +328,18 @@ public class DatabaseManager {
             ps.setInt(3, offset);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
+                String resultStr = rs.getString("result");
+                boolean isWin = rs.getInt("is_win") == 1;
+                boolean isJackpot = resultStr != null && resultStr.toUpperCase().contains("JACKPOT");
+
+                String status = isJackpot ? "JACKPOT" : (isWin ? "THẮNG" : "THUA");
+
                 String line = String.format("[%s] Cược: %,.0f$ | %s | Thưởng: %,.0f$ | %s",
                         rs.getString("timestamp"),
                         rs.getDouble("bet_amount"),
-                        rs.getInt("is_win") == 1 ? (rs.getInt("is_jackpot") == 1 ? "JACKPOT" : "THẮNG") : "THUA",
+                        status,
                         rs.getDouble("payout"),
-                        rs.getString("result")
+                        resultStr != null ? resultStr : ""
                 );
                 history.add(line);
             }
