@@ -31,35 +31,35 @@ Hệ thống Bảng Xếp Hạng 3D Hologram tích hợp sẵn cho cả **Decent
 
 ---
 
-## 🌟 CÁCH 2: LỆNH TẠO TRỰC TIẾP FANCYHOLOGRAMS (`/fh`) TRONG GAME
+## 🌟 CÁCH 2: LỆNH TẠO TRỰC TIẾP FANCYHOLOGRAMS (`/fholo`) TRONG GAME
 
 Đứng tại vị trí muốn đặt Hologram và copy-paste lần lượt các lệnh này vào game:
 
 ```bash
-# 1. Tạo Hologram mới tên 'toptuan' (Chỉ gõ /fh create toptuan)
-/fh create toptuan
+# 1. Tạo Hologram mới tên 'toptuan'
+/fholo create toptuan
 
 # 2. Thêm dòng Tiêu Đề màu Gradient:
-/fh line add toptuan <gradient:#FFD700:#FFA500><bold>✦ TOP 10 THẦN TÀI CASINO (TUẦN) ✦</bold></gradient>
+/fholo edit toptuan addline <gradient:#FFD700:#FFA500><bold>✦ TOP 10 THẦN TÀI CASINO (TUẦN) ✦</bold></gradient>
 
 # 3. Thêm đường kẻ ngang trang trí:
-/fh line add toptuan <gray>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</gray>
+/fholo edit toptuan addline <gray>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</gray>
 
 # 4. Thêm 10 dòng biến Top Thần Tài Tuần (Dạng MiniMessage gradient):
-/fh line add toptuan %paperjackpot_top_line_1%
-/fh line add toptuan %paperjackpot_top_line_2%
-/fh line add toptuan %paperjackpot_top_line_3%
-/fh line add toptuan %paperjackpot_top_line_4%
-/fh line add toptuan %paperjackpot_top_line_5%
-/fh line add toptuan %paperjackpot_top_line_6%
-/fh line add toptuan %paperjackpot_top_line_7%
-/fh line add toptuan %paperjackpot_top_line_8%
-/fh line add toptuan %paperjackpot_top_line_9%
-/fh line add toptuan %paperjackpot_top_line_10%
+/fholo edit toptuan addline %paperjackpot_top_line_1%
+/fholo edit toptuan addline %paperjackpot_top_line_2%
+/fholo edit toptuan addline %paperjackpot_top_line_3%
+/fholo edit toptuan addline %paperjackpot_top_line_4%
+/fholo edit toptuan addline %paperjackpot_top_line_5%
+/fholo edit toptuan addline %paperjackpot_top_line_6%
+/fholo edit toptuan addline %paperjackpot_top_line_7%
+/fholo edit toptuan addline %paperjackpot_top_line_8%
+/fholo edit toptuan addline %paperjackpot_top_line_9%
+/fholo edit toptuan addline %paperjackpot_top_line_10%
 
 # 5. Thêm đường kẻ kết và hướng dẫn:
-/fh line add toptuan <gray>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</gray>
-/fh line add toptuan <yellow><italic>👉 Gõ /jackpot để tham gia Quay Hũ Nổ Hũ!</italic></yellow>
+/fholo edit toptuan addline <gray>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</gray>
+/fholo edit toptuan addline <yellow><italic>👉 Gõ /jackpot để tham gia Quay Hũ Nổ Hũ!</italic></yellow>
 ```
 
 ---
