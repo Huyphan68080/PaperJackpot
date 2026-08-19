@@ -31,7 +31,37 @@ Hệ thống Bảng Xếp Hạng 3D Hologram tích hợp sẵn cho cả **Decent
 
 ---
 
-## 📝 CÁCH 2: MẪU CẤU HÌNH FANCYHOLOGRAMS (`plugins/FancyHolograms/holograms.yml`)
+## 🌟 CÁCH 2: LỆNH TẠO TRỰC TIẾP FANCYHOLOGRAMS (`/fh`) TRONG GAME
+
+Đứng tại vị trí muốn đặt Hologram và copy-paste lần lượt các lệnh này vào game:
+
+```bash
+# 1. Tạo Hologram loại TEXT
+/fh create toptuan text <gradient:#FFD700:#FFA500><bold>✦ TOP 10 THẦN TÀI CASINO (TUẦN) ✦</bold></gradient>
+
+# 2. Thêm đường kẻ ngang trang trí
+/fh line add toptuan <gray>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</gray>
+
+# 3. Thêm 10 dòng biến Top Thần Tài Tuần (Dạng MiniMessage gradient):
+/fh line add toptuan %paperjackpot_top_line_1%
+/fh line add toptuan %paperjackpot_top_line_2%
+/fh line add toptuan %paperjackpot_top_line_3%
+/fh line add toptuan %paperjackpot_top_line_4%
+/fh line add toptuan %paperjackpot_top_line_5%
+/fh line add toptuan %paperjackpot_top_line_6%
+/fh line add toptuan %paperjackpot_top_line_7%
+/fh line add toptuan %paperjackpot_top_line_8%
+/fh line add toptuan %paperjackpot_top_line_9%
+/fh line add toptuan %paperjackpot_top_line_10%
+
+# 4. Thêm đường kẻ kết và hướng dẫn
+/fh line add toptuan <gray>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</gray>
+/fh line add toptuan <yellow><italic>👉 Gõ /jackpot để tham gia Quay Hũ Nổ Hũ!</italic></yellow>
+```
+
+---
+
+## 📝 CÁCH 3: CẤU HÌNH BẰNG FILE FANCYHOLOGRAMS (`plugins/FancyHolograms/holograms.yml`)
 
 Paste đoạn cấu hình này vào file `plugins/FancyHolograms/holograms.yml`:
 
