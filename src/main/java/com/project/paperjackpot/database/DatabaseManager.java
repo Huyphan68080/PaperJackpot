@@ -295,6 +295,16 @@ public class DatabaseManager {
         });
     }
 
+    public void clearWeeklySpinHistory() {
+        String sql = "DELETE FROM spin_history";
+        try (Statement st = connection.createStatement()) {
+            st.executeUpdate(sql);
+            plugin.getLogger().info("[Database] Đã làm sạch dữ liệu Bảng Xếp Hạng & Hologram để bắt đầu Mùa Giải Tuần mới!");
+        } catch (SQLException e) {
+            plugin.getLogger().warning("[Database] Lỗi làm sạch lịch sử mùa giải: " + e.getMessage());
+        }
+    }
+
     public List<String> getRecentHistory(int limit) {
         List<String> history = new ArrayList<>();
         try (PreparedStatement ps = connection.prepareStatement(

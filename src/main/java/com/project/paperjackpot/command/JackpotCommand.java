@@ -285,6 +285,17 @@ public class JackpotCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
 
+            // 11b. LỆNH CHỐT THƯỞNG & RESET MÙA GIẢI TUẦN: /jackpot resetseason
+            if (subCmd.equals("resetseason") || subCmd.equals("resettop")) {
+                if (!hasAdminPermission(sender)) {
+                    sender.sendMessage(configManager.getNoPermissionMsg());
+                    return true;
+                }
+                plugin.getSeasonManager().processWeeklyRewards(System.currentTimeMillis());
+                sender.sendMessage(mm.deserialize("<green>✅ Đã chốt trao thưởng Đua Top Tuần & Reset Bảng Xếp Hạng Hologram sang Mùa Giải mới!</green>"));
+                return true;
+            }
+
             // 11. LỆNH SET QUỸ JACKPOT TÍCH LŨY: /jackpot setpool <số tiền>
             if (subCmd.equals("setpool") || subCmd.equals("sethuff")) {
                 if (!hasAdminPermission(sender)) {
@@ -384,6 +395,7 @@ public class JackpotCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(mm.deserialize(" <gold>/jackpot testhappyhour</gold> - Bắn thử thông báo & âm thanh Giờ Vàng"));
             sender.sendMessage(mm.deserialize(" <gold>/jackpot test</gold> - Kích hoạt 100% Nổ Hũ Hốt Sạch Hũ lượt quay tới"));
             sender.sendMessage(mm.deserialize(" <gold>/jackpot setpool <tiền></gold> - Thao tác thiết lập Quỹ Hũ Tích Lũy"));
+            sender.sendMessage(mm.deserialize(" <gold>/jackpot resetseason</gold> - Chốt thưởng Đua Top Tuần & Reset Bảng Hologram"));
             sender.sendMessage(mm.deserialize(" <gold>/jackpot reload</gold> - Reload cấu hình"));
             sender.sendMessage(mm.deserialize(" <gold>/jackpot history</gold> - Xem lịch sử cược CSDL"));
         }
@@ -399,7 +411,7 @@ public class JackpotCommand implements CommandExecutor, TabCompleter {
         if (args.length == 1) {
             List<String> list = new ArrayList<>(List.of("top", "stats", "tickets", "ve", "time"));
             if (hasAdminPermission(sender)) {
-                list.addAll(List.of("giveticket", "giveitemticket", "givevipticket", "giveitemvipticket", "givevipitem", "testseason", "testhappyhour", "testjackpot", "test", "reload", "history", "setpool"));
+                list.addAll(List.of("resetseason", "resettop", "giveticket", "giveitemticket", "givevipticket", "giveitemvipticket", "givevipitem", "testseason", "testhappyhour", "testjackpot", "test", "reload", "history", "setpool"));
             }
             String current = args[0].toLowerCase();
             return list.stream().filter(s -> s.startsWith(current)).toList();

@@ -124,8 +124,9 @@ public class SeasonManager {
         Component msg = mm.deserialize(broadcastText.toString());
         Bukkit.broadcast(msg);
 
-        // Lưu mốc thời gian vừa trao thưởng
+        // Lưu mốc thời gian vừa trao thưởng & làm sạch dữ liệu Bảng Xếp Hạng Hologram cho tuần mới
         databaseManager.saveLastWeeklyRewardTimeAsync(now);
-        plugin.getLogger().info("[SeasonManager] Đã tự động chốt trao thưởng Đua Top Mùa Giải Tuần thành công!");
+        databaseManager.clearWeeklySpinHistory();
+        plugin.getLogger().info("[SeasonManager] Đã tự động chốt trao thưởng Đua Top Mùa Giải Tuần & Reset Bảng Xếp Hạng Hologram thành công!");
     }
 }
