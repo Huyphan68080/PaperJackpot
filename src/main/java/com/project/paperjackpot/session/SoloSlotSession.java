@@ -640,7 +640,7 @@ public class SoloSlotSession {
         double roll = rand.nextDouble(100.0);
 
         boolean happyHour = plugin.getHappyHourManager() != null && plugin.getHappyHourManager().isHappyHour();
-        double winChance = happyHour ? configManager.getWinRateHappyHour() : configManager.getWinRateNormal(); // 29.3%
+        double winChance = happyHour ? configManager.getWinRateHappyHour() : configManager.getWinRateNormal(); // 22.0%
         double jackpotChance = configManager.getJackpotRate(); // 0.50%
 
         if (isLuckyStreak) {
