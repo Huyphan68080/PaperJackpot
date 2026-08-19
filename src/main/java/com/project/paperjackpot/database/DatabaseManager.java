@@ -305,6 +305,44 @@ public class DatabaseManager {
         }
     }
 
+    public int getPlayerHistoryCount(UUID playerUuid) {
+        String sql = "SELECT COUNT(*) FROM spin_history WHERE player_uuid = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, playerUuid.toString());
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().warning("[Database] Lỗi đếm lịch sử cá nhân: " + e.getMessage());
+        }
+        return 0;
+    }
+
+    public List<String> getPlayerHistory(UUID playerUuid, int limit, int offset) {
+        List<String> history = new ArrayList<>();
+        String sql = "SELECT * FROM spin_history WHERE player_uuid = ? ORDER BY id DESC LIMIT ? OFFSET ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, playerUuid.toString());
+            ps.setInt(2, limit);
+            ps.setInt(3, offset);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                String line = String.format("[%s] Cược: %,.0f$ | %s | Thưởng: %,.0f$ | %s",
+                        rs.getString("timestamp"),
+                        rs.getDouble("bet_amount"),
+                        rs.getInt("is_win") == 1 ? (rs.getInt("is_jackpot") == 1 ? "JACKPOT" : "THẮNG") : "THUA",
+                        rs.getDouble("payout"),
+                        rs.getString("result")
+                );
+                history.add(line);
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().warning("[Database] Lỗi đọc lịch sử cá nhân: " + e.getMessage());
+        }
+        return history;
+    }
+
     public List<String> getRecentHistory(int limit) {
         List<String> history = new ArrayList<>();
         try (PreparedStatement ps = connection.prepareStatement(

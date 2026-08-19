@@ -166,9 +166,23 @@ public class MenuListener implements Listener {
             }
 
             if (event.getClickedInventory().equals(event.getInventory())) {
-                if (event.getSlot() == 22) {
+                int slot = event.getSlot();
+
+                // Nút Quay Về Casino (Slot 22 hoặc Slot 49)
+                if (slot == 22 || slot == 49) {
                     SoloSlotSession slotSession = plugin.getOrCreateSession(player, GameMode.MINERAL_SLOT);
                     slotSession.open(false);
+                    return;
+                }
+
+                // Xử lý Phân Trang Lịch Sử Cược Cá Nhân (Slot 45: Trang Trước, Slot 53: Trang Sau)
+                if (titlePlain.contains("LỊCH SỬ")) {
+                    int currentPage = PersonalHistoryGui.PLAYER_PAGES.getOrDefault(player.getUniqueId(), 1);
+                    if (slot == 45) {
+                        new PersonalHistoryGui(plugin).open(player, Math.max(1, currentPage - 1));
+                    } else if (slot == 53) {
+                        new PersonalHistoryGui(plugin).open(player, currentPage + 1);
+                    }
                 }
             }
         }
