@@ -36,13 +36,16 @@ Hệ thống Bảng Xếp Hạng 3D Hologram tích hợp sẵn cho cả **Decent
 Đứng tại vị trí muốn đặt Hologram và copy-paste lần lượt các lệnh này vào game:
 
 ```bash
-# 1. Tạo Hologram loại TEXT
-/fh create toptuan text <gradient:#FFD700:#FFA500><bold>✦ TOP 10 THẦN TÀI CASINO (TUẦN) ✦</bold></gradient>
+# 1. Tạo Hologram mới tên 'toptuan' (Chỉ gõ /fh create toptuan)
+/fh create toptuan
 
-# 2. Thêm đường kẻ ngang trang trí
+# 2. Thêm dòng Tiêu Đề màu Gradient:
+/fh line add toptuan <gradient:#FFD700:#FFA500><bold>✦ TOP 10 THẦN TÀI CASINO (TUẦN) ✦</bold></gradient>
+
+# 3. Thêm đường kẻ ngang trang trí:
 /fh line add toptuan <gray>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</gray>
 
-# 3. Thêm 10 dòng biến Top Thần Tài Tuần (Dạng MiniMessage gradient):
+# 4. Thêm 10 dòng biến Top Thần Tài Tuần (Dạng MiniMessage gradient):
 /fh line add toptuan %paperjackpot_top_line_1%
 /fh line add toptuan %paperjackpot_top_line_2%
 /fh line add toptuan %paperjackpot_top_line_3%
@@ -54,7 +57,7 @@ Hệ thống Bảng Xếp Hạng 3D Hologram tích hợp sẵn cho cả **Decent
 /fh line add toptuan %paperjackpot_top_line_9%
 /fh line add toptuan %paperjackpot_top_line_10%
 
-# 4. Thêm đường kẻ kết và hướng dẫn
+# 5. Thêm đường kẻ kết và hướng dẫn:
 /fh line add toptuan <gray>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</gray>
 /fh line add toptuan <yellow><italic>👉 Gõ /jackpot để tham gia Quay Hũ Nổ Hũ!</italic></yellow>
 ```
