@@ -85,7 +85,7 @@ public class PaperJackpotExpansion extends PlaceholderExpansion {
         }
 
         if (lower.equals("top_header")) {
-            return "<gradient:#FFD700:#FFA500><bold>✦ TOP ĐẠI GIA CASINO NỔ HŨ ✦</bold></gradient>";
+            return "<gradient:#FFD700:#FFA500><bold>✦ TOP 10 THẦN TÀI CASINO TUẦN ✦</bold></gradient>";
         }
 
         if (lower.equals("top_footer")) {

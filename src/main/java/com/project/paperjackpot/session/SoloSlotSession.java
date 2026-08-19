@@ -358,13 +358,13 @@ public class SoloSlotSession {
 
     public void updatePlayerPersonalItem() {
         ItemStack topItem = buildItem(Material.PLAYER_HEAD,
-                "<gradient:gold:yellow><bold>🏆 TOP 10 BẢNG XẾP HẠNG</bold></gradient>",
+                "<gradient:gold:yellow><bold>🏆 TOP 10 THẦN TÀI TUẦN</bold></gradient>",
                 List.of(
                         "",
-                        " <gray>Xem danh sách Top 10 Đại Gia</gray>",
-                        " <gray>thắng thưởng nhiều nhất server!",
+                        " <gray>Xem danh sách Top 10 Thần Tài</gray>",
+                        " <gray>thắng thưởng nhiều nhất tuần này!",
                         "",
-                        " <yellow>👉 CLICK ĐỂ XEM BẢNG XẾP HẠNG!"
+                        " <yellow>👉 CLICK ĐỂ XEM BẢNG XẾP HẠNG TUẦN!"
                 ));
         if (topItem.getItemMeta() instanceof SkullMeta skullMeta) {
             skullMeta.setOwningPlayer(player);

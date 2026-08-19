@@ -31,7 +31,7 @@ public class LeaderboardGui {
 
     public void open(Player player) {
         // Tiêu đề màu Đỏ Đô đậm nổi bật trên nền xám GUI container
-        Component title = mm.deserialize("<gradient:#8B0000:#D2143A><bold>🏆 BẢNG XẾP HẠNG TOP 10</bold></gradient>");
+        Component title = mm.deserialize("<gradient:#8B0000:#D2143A><bold>🏆 TOP 10 THẦN TÀI TUẦN</bold></gradient>");
         Inventory gui = Bukkit.createInventory(null, 27, title);
 
         // Viền kính xám
@@ -56,10 +56,10 @@ public class LeaderboardGui {
                 int rank = i + 1;
 
                 String rankPrefix = switch (rank) {
-                    case 1 -> "<gradient:gold:yellow><bold>🥇 TOP 1 (ĐẠI PHÚ): ";
-                    case 2 -> "<gradient:white:gray><bold>🥈 TOP 2 (ĐẠI GIA): ";
-                    case 3 -> "<gradient:#CD7F32:#8B4513><bold>🥉 TOP 3 (THẦN TÀI): ";
-                    default -> "<yellow><bold>⭐ TOP " + rank + ": ";
+                    case 1 -> "<gradient:gold:yellow><bold>🥇 TOP 1 TUẦN: ";
+                    case 2 -> "<gradient:white:gray><bold>🥈 TOP 2 TUẦN: ";
+                    case 3 -> "<gradient:#CD7F32:#8B4513><bold>🥉 TOP 3 TUẦN: ";
+                    default -> "<yellow><bold>⭐ TOP " + rank + " TUẦN: ";
                 };
 
                 ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
