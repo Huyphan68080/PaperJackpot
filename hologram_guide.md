@@ -12,19 +12,19 @@ Hệ thống Bảng Xếp Hạng 3D Hologram tích hợp sẵn cho cả **Decent
 # 1. Tạo bảng Hologram mới
 /dh create toptuan &e&l✦ TOP 10 THẦN TÀI CASINO (MÙA TUẦN) ✦
 
-# 2. Thêm các dòng biến PlaceholderAPI đối xứng
-/dh line add toptuan %paperjackpot_top_line_decent_1%
-/dh line add toptuan %paperjackpot_top_line_decent_2%
-/dh line add toptuan %paperjackpot_top_line_decent_3%
-/dh line add toptuan %paperjackpot_top_line_decent_4%
-/dh line add toptuan %paperjackpot_top_line_decent_5%
-/dh line add toptuan %paperjackpot_top_line_decent_6%
-/dh line add toptuan %paperjackpot_top_line_decent_7%
-/dh line add toptuan %paperjackpot_top_line_decent_8%
-/dh line add toptuan %paperjackpot_top_line_decent_9%
-/dh line add toptuan %paperjackpot_top_line_decent_10%
-/dh line add toptuan &f
-/dh line add toptuan &e&o👉 Gõ /jackpot để tham gia Quay Hũ Nổ Hũ!
+# 2. Thêm các dòng bằng lệnh /dh l add (hoặc /dh lines add)
+/dh l add toptuan %paperjackpot_top_line_decent_1%
+/dh l add toptuan %paperjackpot_top_line_decent_2%
+/dh l add toptuan %paperjackpot_top_line_decent_3%
+/dh l add toptuan %paperjackpot_top_line_decent_4%
+/dh l add toptuan %paperjackpot_top_line_decent_5%
+/dh l add toptuan %paperjackpot_top_line_decent_6%
+/dh l add toptuan %paperjackpot_top_line_decent_7%
+/dh l add toptuan %paperjackpot_top_line_decent_8%
+/dh l add toptuan %paperjackpot_top_line_decent_9%
+/dh l add toptuan %paperjackpot_top_line_decent_10%
+/dh l add toptuan &f
+/dh l add toptuan &e&o👉 Gõ /jackpot để tham gia Quay Hũ Nổ Hũ!
 ```
 
 ---
