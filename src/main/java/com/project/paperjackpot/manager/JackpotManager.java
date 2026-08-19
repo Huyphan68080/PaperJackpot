@@ -4,6 +4,7 @@ import com.project.paperjackpot.PaperJackpot;
 import com.project.paperjackpot.database.DatabaseManager;
 import net.kyori.adventure.bossbar.BossBar;
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
 /**
@@ -109,6 +110,11 @@ public class JackpotManager {
         this.lastWinnerName = winnerName;
         String msg = "<gradient:#FF0000:#FFD700><bold>🎉 CHÚC MỪNG PHÁT LỘC! " + winnerName + " VỪA TRÚNG NỔ HŨ " + ConfigManager.formatMoney(amount) + "$! 🎉</bold></gradient>";
         Bukkit.broadcast(configManager.getMiniMessage().deserialize(msg));
+
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            p.playSound(p.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.2f);
+            p.playSound(p.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_TWINKLE, 1.0f, 1.0f);
+        }
     }
 
     public void updateGlobalBossBar() {

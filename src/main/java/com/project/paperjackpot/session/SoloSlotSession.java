@@ -455,6 +455,7 @@ public class SoloSlotSession {
         player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.2f);
 
         this.currentBetAmount = 1000.0;
+        this.isUsingTicket = true; // Đánh dấu lượt quay miễn phí để không trừ tiền/nạp hũ khi thua!
         isSpinning = true;
         updateSpinButton();
         updateDailyFreeSpinItem();
@@ -766,12 +767,15 @@ public class SoloSlotSession {
 
             plugin.getEconomy().depositPlayer(player, netReward);
 
-            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.4f);
             if (isJackpot) {
                 spawnJackpotFireworksAndParticles(player);
+                player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
+                player.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_DEATH, 0.4f, 1.4f);
+                player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 0.8f);
                 lastResultText = "<gradient:#FF0000:#FFD700><bold>NỔ HŨ HỐT SẠCH HŨ +" + ConfigManager.formatMoney(netReward) + "$!</bold></gradient>";
                 player.sendMessage(configManager.getJackpotWinMsg(currentBetAmount, grossReward, taxAmount, netReward));
             } else {
+                player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.4f);
                 lastResultText = "<green><bold>THẮNG X2 +" + ConfigManager.formatMoney(netReward) + "$ (" + detailText + ")</bold></green>";
                 player.sendMessage(configManager.getWinMsg(detailText, multiplier, currentBetAmount, grossReward, taxAmount, netReward));
             }
