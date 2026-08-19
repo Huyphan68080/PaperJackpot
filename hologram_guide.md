@@ -39,7 +39,10 @@ Hệ thống Bảng Xếp Hạng 3D Hologram tích hợp sẵn cho cả **Decent
 # 1. Tạo Hologram mới tên 'toptuan'
 /fholo create toptuan
 
-# 2. Thêm dòng Tiêu Đề màu Gradient:
+# 2. XÓA DÒNG MẶC ĐỊNH MẶC ĐỊNH "Edit this line with...":
+/fholo edit toptuan removeline 1
+
+# 3. Thêm dòng Tiêu Đề màu Gradient:
 /fholo edit toptuan addline <gradient:#FFD700:#FFA500><bold>✦ TOP 10 THẦN TÀI CASINO (TUẦN) ✦</bold></gradient>
 
 # 3. Thêm đường kẻ ngang trang trí:
